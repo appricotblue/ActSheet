@@ -1,0 +1,140 @@
+{% extends "admin/layouts/app.html" %}
+{% block content %}
+<div class="container-fluid page-body-wrapper">
+    <div class="main-panel">
+        <div class="content-wrapper">
+            <div class="row my-3">
+                <div class="col" style="margin-left: 10px;">
+                    <h4 class="card-title div-title">Customers</h4>
+                </div>
+                {% if request.session.agentId and submit_tl == False or not request.session.agentId %}
+                <div class="col" style="text-align: right;">
+                    {% if request.session.agentId and customer_list != None %}
+                    <a href="{% url 'task-submit' %}?id={{task_id}}" class="revoke-btn me-3" style="width: 180px;height: 36px;">Submit to Team Leader</a>
+                    {% endif %}
+                    <a href="{% url 'add-customer' %}?id={{task_id}}" style="height: 35px;" class="btn-add btn btn-block btn-primary btn-sm font-weight-medium auth-form-btn">+ ADD NEW</a>
+                </div>
+                {% else %}
+                <div class="col" style="text-align: right;">
+                    <a href="{% url 'task-request' %}?id={{task_id}}" class="revoke-btn me-3" style="width: 200px;height: 36px;">Request To Team Leader</a>
+                </div>
+                {% endif %}
+            </div>
+            <div class="row">
+                <div class="col-lg-12 grid-margin stretch-card">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="mb-4">
+                                <a href="{% url 'list-task' %}">
+                                    <div style = "display : inline-block" class="me-2">
+                                        <i class="fa fa-arrow-left card-title"></i>
+                                    </div>
+                                </a>
+                                <div style = "display : inline-block">
+                                    <h4 class="card-title">List Customer Data</h4>
+                                </div>
+                            </div>
+                            <div>
+                            {% if messages %}
+                                {% for message in messages %}
+                                    <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}" role="alert">{{ message }}</div>
+                                {% endfor %}
+                            {% endif %}
+                            </div>
+                            <div class="table-responsive">
+                                {% if customer_list %}
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Sl. No</th>
+                                            <th>Date</th>
+                                            <th>Customer ID</th>
+                                            <th>Entry Time</th>
+                                            <th>Exit Time</th>
+                                            <th>Dwell Time</th>
+                                            <th>Visited Zones</th>
+                                            <th>Window Zones</th>
+                                            <th>Staff Name</th>
+                                            <th>Conversion Status</th>
+                                            <th>Repeat Customer</th>
+                                            {% if request.session.agentId and submit_tl == False or not request.session.agentId %}
+                                            <th>Action</th>
+                                            {% endif %}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for x in customer_list %}
+                                        <tr>
+                                            <td class="py-1">
+                                                {{x.id}}
+                                            </td>
+                                            <td>
+                                                {{ x.date|date:"M d, Y" }}
+                                            </td>
+                                            <td>
+                                                {{x.customer_id}}
+                                            </td>
+                                            <td>
+                                                {{x.customer_entry_time}}
+                                            </td>
+                                            <td>
+                                                {{x.customer_exit_time}}
+                                            </td>
+                                            <td>
+                                                {{x.dwell_time}}
+                                            </td>
+                                            <td>
+                                                {{x.zone_ids}}
+                                            </td>
+                                            <td>
+                                                {{x.window_zone_ids}}
+                                            </td>
+                                            <td>
+                                                {{x.conversion_to.name}}
+                                            </td>
+                                            <td>
+                                                {{x.conversion_status}}
+                                            </td>
+                                            <td>
+                                                {{x.repeat_customer}}
+                                            </td>
+                                            {% if request.session.agentId and submit_tl == False or not request.session.agentId %}
+                                            <td>
+                                                <div class="dropdown">
+                                                    <a href="#" class="text-success btn btn-link  px-1"><i class="mdi mdi-refresh"></i></a>
+                                                    <a href="#" class="text-success btn btn-link px-1 dropdown-toggle dropdown-arrow-none" data-bs-toggle="dropdown" id="settingsDropdownsales">
+                                                        <i class="mdi mdi-dots-horizontal"></i>
+                                                    </a>
+                                                    <div class="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="settingsDropdownsales">
+                                                        {% if request.session.agentId and x.submit_tl == False or not request.session.agentId %}
+                                                        <a href="{% url 'edit-customer' %}?id={{x.id}}" class="dropdown-item">
+                                                            <i class="mdi mdi-grease-pencil text-primary"></i>
+                                                            Edit
+                                                        </a>
+                                                        <a href="{% url 'delete-customer' %}?id={{x.id}}" class="dropdown-item">
+                                                            <i class="mdi mdi-delete text-primary"></i>
+                                                            Delete
+                                                        </a>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            {% endif %}
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                                {% else %}
+                                <div style="text-align: center;">
+                                    No Data Found
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

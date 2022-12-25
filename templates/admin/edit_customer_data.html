@@ -1,0 +1,430 @@
+{% extends "admin/layouts/app.html" %}
+{% block content %}
+<div class="container-fluid page-body-wrapper">
+    <div class="main-panel">
+      <div class="content-wrapper">
+        <div class="row">
+            <div class="col-12 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <a href="{% url 'list-customer' %}?id={{task_id}}">
+                                <div style = "display : inline-block" class="me-2">
+                                    <i class="fa fa-arrow-left card-title"></i>
+                                </div>
+                            </a>
+                            <div style = "display : inline-block">
+                                <h4 class="card-title">Edit Customer Data</h4>
+                            </div>
+                        </div>
+                        <form class="forms-sample" action="{% url 'edit-customer' %}" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="id" value="{{customer_data.id}}">
+                            <input type="hidden" name="task_id" value="{{task_id}}">
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <p class="card-description" style="color: #4D8EFF;">
+                                        Basic Data
+                                    </p>
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">Date</label>
+                                        <input type="date" name="date" class="form-control" id="date" value="{{customer_data.date|date:'Y-m-d'}}" required>
+                                        <p class="card-description error" style="color: red; display:none">
+                                            Please select date
+                                        </p>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">Opening Time</label>
+                                        <input type="time" name="opening_time" class="form-control" value="{{customer_data.opening_time}}" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">Closing Time</label>
+                                        <input type="time" name="closing_time" class="form-control" value="{{customer_data.closing_time}}" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">Customer ID</label>
+                                        <input type="number" name="customer_id" min="0" class="form-control" value="{{customer_data.customer_id}}" placeholder="Customer ID" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">Customer Entry Time Period</label>
+                                        <select name="time_period_id" class="form-control w-100" required>
+                                            <option value="" disabled selected>Select Period</option>
+                                            {% for x in time_period %}
+                                            <option value="{{x.id}}" {% if x.id == customer_data.time_period_id.id %} selected {% endif %}>{{x.period}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">Customer Entry Time</label>
+                                        <input type="time" name="customer_entry_time" class="form-control" value="{{customer_data.customer_entry_time}}"  id="customer_entry_time" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">Customer Exit Time</label>
+                                        <input type="time" name="customer_exit_time" class="form-control" value="{{customer_data.customer_exit_time}}" id="customer_exit_time" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">Dwell Time</label>
+                                        <input type="text" name="" class="form-control dwell_time" value="{{customer_data.dwell_time}}" readonly>
+                                        <input type="hidden" name="dwell_time" class="form-control dwell_time" value="{{customer_data.dwell_time}}" readonly>
+                                    </div>
+                                    <div class="form-group">
+                                        <div style="display: inline-block;" class="me-5">
+                                            <label for="exampleInputName1" class="me-1">Single</label>
+                                            <label class="toggle-switch">
+                                                <input type="radio" name="single" id="single" value="single" {% if customer_data.single == True %} checked  {% endif %}>
+                                                <span class="toggle-slider round"></span>
+                                            </label> 
+                                        </div>
+                                        <div style="display: inline-block; margin-left: 60px;">
+                                            <label for="exampleInputName1" class="me-3">Group</label>
+                                            <label class="toggle-switch">
+                                                <input type="radio" class="checkbox" name="single" id="group" value="group" {% if customer_data.group == True %} checked  {% endif %}>
+                                                <span class="toggle-slider round"></span>
+                                            </label> 
+                                        </div>
+                                    </div>
+                                    <div class="form-group single-div" {% if customer_data.single == False %} style="display:none"  {% endif %}>
+                                        <div style="display: inline-block;" class="me-5">
+                                            <label for="exampleInputName1" class="me-3">Male</label>
+                                            <label class="toggle-switch">
+                                                <input type="radio" name="sex"  class="male-checked" value="is_male" {% if customer_data.male == True %} checked  {% endif %}>
+                                                <span class="toggle-slider round"></span>
+                                            </label> 
+                                        </div>
+                                        <div style="display: inline-block; margin-left: 52px;">
+                                            <label for="exampleInputName1" class="me-3" >Female</label>
+                                            <label class="toggle-switch">
+                                                <input type="radio" name="sex" class="female-checked" value="is_female" {% if customer_data.female == True %} checked  {% endif %}>
+                                                <span class="toggle-slider round"></span>
+                                            </label> 
+                                        </div>
+                                    </div>
+                                    <div class="form-group group-div" {% if customer_data.group == False %} style="display:none"  {% endif %}>
+                                        <div style="display: inline-block; width: 140px;" class="me-5">
+                                            <label for="exampleInputName1" class="me-3">Male</label>
+                                            <input type="number" name="no_of_male" min="0"  id="no_of_male" class="form-control" value="{{customer_data.no_of_male}}">
+                                        </div>
+                                        <div style="display: inline-block; width: 140px;">
+                                            <label for="exampleInputName1" class="me-3" >Female</label>
+                                            <input type="number" name="no_of_female"  min="0" id="no_of_female" class="form-control" value="{{customer_data.no_of_female}}">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">Visited Zones</label>
+                                        <select name="zone_ids[]" class="form-control js-select w-100" multiple="multiple" id="js-select">
+                                            <option value="" disabled>Select Zones</option>
+                                            {% for x in zone_list %}
+                                            <option value="{{x.id}}" {% if x.id|stringformat:"i" in customer_data.zone_ids %} selected {% endif %}>{{x.zone}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">Window Zones</label>
+                                        <select name="window_zone_ids[]" class="form-control js-select2 w-100" multiple="multiple" id="js-select1">
+                                            <option value="" disabled>Select Window Zones</option>
+                                            {% for x in window_zone_list %}
+                                            <option value="{{x.id}}" {% if x.id|stringformat:"i" in customer_data.window_zone_ids %} selected {% endif %}>{{x.zone}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">Staff</label>
+                                        <select name="staff_ids[]" class="form-control w-100" multiple="multiple" id="js-select2">
+                                            <option value="" disabled>Select Staff</option>
+                                            {% for x in staff_list %}
+                                            <option value="{{x.id}}" {% if x.id|stringformat:"i" in customer_data.staff_ids %} selected {% endif %}>{{x.name}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="seperator-v"></div>
+                                </div>
+                               
+                                <div class="col-sm-4">
+                                    <p class="card-description" style="color: #4D8EFF;">
+                                        Repeat Customer
+                                    </p>
+                                    <div class="form-group">
+                                        <label for="exampleInputName1" class="me-3">Repeat Customer</label>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" name="repeat_customer" id="repeat_customer" value="1" {% if customer_data.repeat_customer == True %} checked  {% endif %}>
+                                            <span class="toggle-slider round"></span>
+                                        </label> 
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">Repeat Customer ID</label>
+                                        <input type="number" name="repeat_customer_id" id="repeat_customer_id" value="{{customer_data.repeat_customer_id}}" min="0" class="form-control" id="exampleInputName1" placeholder="Repear Customer ID" {% if customer_data.repeat_customer == True %} required  {% endif %}>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">Repeat Customer Visit Date</label>
+                                        <input type="date" name="repeat_customer_visit_date" id="repeat_customer_visit_date" value="{{customer_data.repeat_customer_visit_date|date:'Y-m-d'}}" class="form-control" {% if customer_data.repeat_customer == True %} required  {% endif %}>
+                                    </div>
+                                    <p class="card-description" style="color: #4D8EFF;">
+                                        Process Data
+                                    </p>
+                                    <div class="form-group">
+                                        <label for="exampleInputName1" class="me-3">Tray</label>
+                                        <label class="toggle-switch" style="margin-left: 100px;">
+                                            <input type="checkbox" name="tray" value="1" {% if customer_data.tray == True %} checked  {% endif %}>
+                                            <span class="toggle-slider round"></span>
+                                        </label> 
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="exampleInputName1" class="me-3">Refreshment</label>
+                                        <label class="toggle-switch" style="margin-left: 44px;">
+                                            <input type="checkbox" name="refreshment" value="1" {% if customer_data.refreshment == True %} checked  {% endif %}>
+                                            <span class="toggle-slider round"></span>
+                                        </label> 
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="exampleInputName1" class="me-3">Gloves</label>
+                                        <label class="toggle-switch" style="margin-left: 86px;">
+                                            <input type="checkbox" name="gloves" value="1" {% if customer_data.gloves == True %} checked  {% endif %}>
+                                            <span class="toggle-slider round"></span>
+                                        </label> 
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="exampleInputName1" class="me-3">Backup Stock</label>
+                                        <label class="toggle-switch" style="margin-left: 40px;">
+                                            <input type="checkbox" name="backup_stock" value="1"  {% if customer_data.backup_stock == True %} checked  {% endif %}>
+                                            <span class="toggle-slider round"></span>
+                                        </label> 
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="exampleInputName1" class="me-3">Business Card</label>
+                                        <label class="toggle-switch" style="margin-left: 38px;">
+                                            <input type="checkbox" name="business_card" value="1" {% if customer_data.business_card == True %} checked  {% endif %}>
+                                            <span class="toggle-slider round"></span>
+                                        </label> 
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="exampleInputName1" class="me-3">Body Language</label>
+                                        <label class="toggle-switch" style="margin-left: 30px;">
+                                            <input type="checkbox" name="body_language" value="1" {% if customer_data.body_language == True %} checked  {% endif %}>
+                                            <span class="toggle-slider round"></span>
+                                        </label> 
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="exampleInputName1" class="me-3">Full Uniform</label>
+                                        <label class="toggle-switch" style="margin-left: 50px;">
+                                            <input type="checkbox" name="full_uniform" value="1" {% if customer_data.full_uniform == True %} checked  {% endif %}>
+                                            <span class="toggle-slider round"></span>
+                                        </label> 
+                                    </div>
+                                    <div class="seperator-v2"></div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <p class="card-description" style="color: #4D8EFF;">
+                                        Conversion Data
+                                    </p>
+                                    <div class="form-group">
+                                        <label for="exampleInputName1" class="me-3">Conversion Status</label>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" name="conversion_status" id="conversion_status" value="1" {% if customer_data.conversion_status == True %} checked  {% endif %}>
+                                            <span class="toggle-slider round"></span>
+                                        </label> 
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">Converted Count</label>
+                                        <input type="number" min="1" name="converted_count" id="converted_count" value="{{customer_data.converted_count}}" class="form-control" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">Conversion %</label>
+                                        <input type="number" min="1" name="conversion_percentage" id="conversion_percentage" value="{{customer_data.conversion_percentage}}" class="form-control" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">Conversion To</label>
+                                        <select name="conversion_to" id="conversion_to" class="form-control w-100">
+                                            <option value="" disabled selected>Select Staff</option>
+                                            {% for x in staff_list %}
+                                            <option value="{{x.id}}" {% if x.id == customer_data.conversion_to.id %} selected {% endif %}>{{x.name}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">Invoice Time</label>
+                                        <input type="time" name="invoice_time" class="form-control" value="{{customer_data.invoice_time}}" required>
+                                    </div>
+                                    <p class="card-description" style="color: #4D8EFF;">
+                                        Commments
+                                    </p>
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">Reason For No Conversion</label>
+                                        <textarea  class="form-control" name="reason_for_no_conversion" id="reason_for_no_conversion" rows="4" cols="50" {% if customer_data.conversion_status == False %} required  {% endif %}>{{customer_data.reason_for_no_conversion}}</textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">Remark</label>
+                                        <textarea  class="form-control" name="remark" rows="4" cols="50" required>{{customer_data.remark}}</textarea>
+                                    </div>
+                                    <div style="display: inline-block;">
+                                        <button type="submit" name="button" value="draft" class="btn btn-primary btn-submit me-2" style="width: 140px;">Submit</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $('#customer_entry_time').change(function () {
+        var date            = $('#date').val();
+        var cus_entry_time  = $(this).val();
+        var cus_exit_time   = $('#customer_exit_time').val();
+        
+        if(date.length == 0)
+        {
+            $('.error').show();
+            $("html, body").animate({ scrollTop: 0 }, "slow");
+            return;
+        }
+
+        $('.dwell_time').empty();
+
+        if(cus_exit_time.length != 0)
+        {
+            var dwell_time  = (new Date(date+" " + cus_exit_time) - new Date(date+" "+ cus_entry_time) ) /1000/60;
+            
+            var hour        = parseInt(dwell_time/60);
+            var min         = dwell_time%60;
+
+            if(min<10){
+                min         = "0" + min;
+            }
+            var time        = (hour + ":" + min);
+
+            $('.dwell_time').val(time);
+        }
+    });
+
+
+    $('#customer_exit_time').change(function () {
+        var date                = $('#date').val();
+        var cus_exit_time       = $(this).val();
+        var cus_entry_time      = $('#customer_entry_time').val();
+
+        if(date.length == 0)
+        {
+            $('.error').show();
+            $("html, body").animate({ scrollTop: 0 }, "slow");
+            return;
+        }
+
+        $('.dwell_time').empty();
+
+        if(cus_exit_time.length != 0)
+        {
+            var dwell_time  = (new Date(date+" " + cus_exit_time) - new Date(date+" "+ cus_entry_time) ) /1000/60;
+            
+            var hour        = parseInt(dwell_time/60);
+            var min         = dwell_time%60;
+
+            if(min<10){
+                min         = "0" + min;
+            }
+            var time        = (hour + ":" + min);
+
+            $('.dwell_time').val(time);
+        }
+
+    });
+
+
+    $('#date').change(function () {
+        var date                = $(this).val();
+        var cus_exit_time       = $('#customer_exit_time').val();
+        var cus_entry_time      = $('#customer_entry_time').val();
+
+        $('.error').hide();
+        if(cus_exit_time.length != 0 && cus_entry_time.length != 0)
+        {  
+            $('.dwell_time').empty();
+
+            if(cus_exit_time != null)
+            {
+                var dwell_time  = (new Date(date+" " + cus_exit_time) - new Date(date+" "+ cus_entry_time) ) /1000/60;
+                
+                var hour        = parseInt(dwell_time/60);
+                var min         = dwell_time%60;
+
+                if(min<10){
+                    min         = "0" + min;
+                }
+                var time        = (hour + ":" + min);
+
+                $('.dwell_time').val(time);
+            }
+        }
+    });
+</script>
+<script>
+    $('#group').change(function(){
+        var no_of_male      = "{{customer_data.no_of_male}}";
+        var no_of_female    = "{{customer_data.no_of_female}}";
+
+        console.log(no_of_male);
+        if($(this).is(":checked")) {
+            $('.group-div').show();
+            $('.single-div').hide();
+            $('#no_of_male').attr('required', true); 
+            $('#no_of_female').attr('required', true); 
+            $('.female-checked').removeAttr('checked');
+            $('.male-checked').removeAttr('checked');
+
+            $('#no_of_female').val(no_of_female); 
+            $('#no_of_male').val(no_of_male); 
+        } 
+    });
+</script>
+
+<script>
+    $('#single').change(function(){
+        if($(this).is(":checked")) {
+            $('.group-div').hide();
+            $('.single-div').show();
+            $('#no_of_male').removeAttr('required'); 
+            $('#no_of_female').removeAttr('required'); 
+            $('.male-checked').attr('checked', true); 
+            $('#no_of_female').val(0); 
+            $('#no_of_male').val(0); 
+        } 
+    });
+</script>
+<script>
+    $('#repeat_customer').change(function(){
+        if($(this).is(":checked")) {
+            $('#repeat_customer_id').attr('required', true); 
+            $('#repeat_customer_visit_date').attr('required', true);
+        } 
+        else
+        {
+            $('#repeat_customer_id').removeAttr('required');
+            $('#repeat_customer_visit_date').removeAttr('required');
+            $('#repeat_customer_id').val(''); 
+            $('#repeat_customer_visit_date').val('');
+        }
+    });
+</script>
+<script>
+    $('#conversion_status').change(function(){
+        if($(this).is(":checked")) {
+            $('#converted_count').val(1); 
+            $('#conversion_percentage').val(100);
+            $('#conversion_to').attr('required', true); 
+            $('#reason_for_no_conversion').removeAttr('required');
+        } 
+        else
+        {
+            $('#converted_count').val('');
+            $('#conversion_percentage').val('');
+            $('#conversion_to').removeAttr('required');
+            $('#conversion_to').val('');
+            $('#reason_for_no_conversion').attr('required', true); 
+            $('#converted_count').removeAttr('required');
+            $('#conversion_percentage').removeAttr('required');
+        }
+    });
+</script>
+{% endblock %}

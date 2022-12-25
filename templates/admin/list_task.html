@@ -1,0 +1,120 @@
+{% extends "admin/layouts/app.html" %}
+{% block content %}
+<div class="container-fluid page-body-wrapper">
+    <div class="main-panel">
+        <div class="content-wrapper">
+            <div class="row my-3">
+                <div class="col" style="margin-left: 10px; display: inline-block;">
+                    <h4 class="card-title div-title">Task</h4>
+                </div>
+                <div class="search-container" style="display: inline-block;">
+                    <form action="{% url 'search-task' %}" method="post">
+                        {% csrf_token %}
+                        <input type="text" placeholder="Search.." name="search" value="{{search_key}}" class="form-control" required style="width :240px; width: 240px;margin-top: -23px;margin-left: 62px;height: 35px;">
+                        <button type="submit" class="btn-add btn btn-block btn-primary btn-sm font-weight-medium auth-form-btn" style="width: 53px; margin-top: -60px; margin-left: 306px; height: 35px;"><i class="fa fa-search"></i></button>
+                    </form>
+                </div>
+                {% if not request.session.agentId %}
+                <div class="col" style="text-align: right;">
+                    <a href="{% url 'add-task' %}" class="btn-add btn btn-block btn-primary btn-sm font-weight-medium auth-form-btn">+ ADD NEW</a>
+                </div>
+                {% endif %}
+            </div>
+            <div class="row">
+                <div class="col-lg-12 grid-margin stretch-card">
+                    <div class="card">
+                        <div class="card-body">
+                            <div>
+                            {% if messages %}
+                                {% for message in messages %}
+                                    <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}" role="alert">{{ message }}</div>
+                                {% endfor %}
+                            {% endif %}
+                            </div>
+                            
+                            <div class="table-responsive">
+                                {% if task_list %}
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Task Id</th>
+                                            <th>Title</th>
+                                            <th>Client Id</th>
+                                            <th>Job</th>
+                                            <th>Start Date</th>
+                                            <th>End Date</th>
+                                            <th>Status</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for x in task_list %}
+                                        <tr>
+                                            <td class="py-1">
+                                                {{x.task_id}}
+                                            </td>
+                                            <td>
+                                                {{x.title}}
+                                            </td>
+                                            <td>
+                                                {{x.client_id.client_id}}
+                                            </td>
+                                            <td>
+                                                {{x.job_id.title}}
+                                            </td>
+                                            <td>
+                                                {{ x.start_date|date:"M d, Y" }}
+                                            </td>
+                                            <td>
+                                                {{ x.end_date|date:"M d, Y" }}
+                                            </td>
+                                            <td>
+                                                {{ x.status }}
+                                            </td>
+                                            <td>
+                                                <a href="{% url 'list-customer' %}?id={{x.id}}">
+                                                    <i class="fa fa-table text-primary text-success me-2"></i>
+                                                </a>
+                                                {% if not request.session.agentId %}
+                                                <a href="{% url 'edit-task' %}?id={{x.id}}">
+                                                    <i class="mdi mdi-grease-pencil text-primary text-success me-2"></i>
+                                                </a>
+                                                <a href="{% url 'delete-task' %}?id={{x.id}}">
+                                                    <i class="mdi mdi-delete text-primary text-success me-2"></i>
+                                                </a>
+                                                {% elif request.session.agentId %}
+                                                <a href="{% url 'view-task' %}?id={{x.id}}">
+                                                    <i class="mdi mdi-eye text-primary text-success me-2"></i>
+                                                </a>
+                                                {% endif %}
+                                                {% if not request.session.agentId and x.have_request == True %}
+                                                <span class="bullet bullet-dot h-6px w-6px bg-danger position-absolute animation-blink" style="padding-bottom: 7px;
+                                                    padding-right: 7px;    
+                                                    color: white; 
+                                                    font-size: 12px;
+                                                    text-align: center;
+                                                    width: 60px;
+                                                    height: 20px;
+                                                    border-radius: 0 !important;">
+                                                    <p style="font-size: 12px;"><a href="{% url 'change-request-status' %}?id={{x.id}}" style="color:white;">Request</a></p>
+                                                </span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                                {% else %}
+                                <div style="text-align: center;">
+                                    No Data Found
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends "admin/layouts/app.html" %}
+{% block content %}
+<div class="container-fluid page-body-wrapper">
+    <div class="main-panel">
+      <div class="content-wrapper">
+        <div class="row">
+            <div class="col-12 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <a href="{% url 'list-shift' %}">
+                                <div style = "display : inline-block" class="me-2">
+                                    <i class="fa fa-arrow-left card-title"></i>
+                                </div>
+                            </a>
+                            <div style = "display : inline-block">
+                                <h4 class="card-title">Edit Shift Details</h4>
+                            </div>
+                        </div>
+                        {% for x in shift_data%}
+                        <form class="forms-sample" action="{% url 'edit-shift' %}?id={{x.id}}" method="post">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label for="exampleInputName1">From</label>
+                                <input type="time" name="from" value="{{x.from_time}}" class="form-control" id="exampleInputName1" placeholder="From" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="exampleInputEmail3">To</label>
+                                <input type="time" name="to" value="{{x.to_time}}" class="form-control" id="exampleInputEmail3" placeholder="To" required>
+                            </div>
+                            <div>
+                                <button type="submit" class="btn btn-primary btn-submit me-2">Submit</button>
+                            </div>
+                        </form>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

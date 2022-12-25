@@ -1,0 +1,96 @@
+{% extends "admin/layouts/app.html" %}
+{% block content %}
+<div class="container-fluid page-body-wrapper">
+    <div class="main-panel">
+      <div class="content-wrapper">
+        <div class="row">
+            <div class="col-12 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <a href="{% url 'list-task' %}">
+                                <div style = "display : inline-block" class="me-2">
+                                    <i class="fa fa-arrow-left card-title"></i>
+                                </div>
+                            </a>
+                            <div style = "display : inline-block">
+                                <h4 class="card-title">Add Task</h4>
+                            </div>
+                        </div>
+                        <form class="forms-sample" action="{% url 'add-task' %}" method="post">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label for="exampleInputName1">Title</label>
+                                <input type="text" name="title" class="form-control" id="exampleInputName1" placeholder="Title" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="exampleInputName1">Description</label>
+                                <textarea  class="form-control" name="description" rows="4" cols="50" required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="exampleInputName1">Job</label>
+                                <select name="job_id" class="form-control" id="exampleInputName1" required>
+                                    <option value="" selected disabled>Select Job</option>
+                                    {% for x in job_list %}
+                                    <option value="{{x.id}}">{{x.title}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">Start Date</label>
+                                        <input type="date" name="start_date" class="form-control" id="exampleInputName1" placeholder="Zone" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">Start Time</label>
+                                        <input type="time" name="start_time" class="form-control" id="exampleInputName1" placeholder="Zone" required>
+                                    </div>
+                                    
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">End Date</label>
+                                        <input type="date" name="end_date" class="form-control" id="exampleInputName1" placeholder="Zone" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">End Time</label>
+                                        <input type="time" name="end_time" class="form-control" id="exampleInputName1" placeholder="Zone" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="exampleInputName1">Required Hours</label>
+                                <input type="number" name="required_hrs" class="form-control" id="exampleInputName1" placeholder="Required Hours" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="exampleInputName1">Team Leader</label>
+                                <select name="team_leader_id" class="form-control" id="exampleInputName1">
+                                    <option value="" selected disabled>Select Team Leader</option>
+                                    {% for x in team_leader_list %}
+                                    <option value="{{x.id}}">{{x.name}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="exampleInputName1">Agent</label>
+                                <select name="agent_id" class="form-control" id="exampleInputName1">
+                                    <option value="" selected disabled>Select Agent</option>
+                                    {% for x in agent_list %}
+                                    <option value="{{x.id}}">{{x.name}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div>
+                                <button type="submit" class="btn btn-primary btn-submit me-2">Submit</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
