@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.views.decorators.cache import cache_control
-from .models import admin_tb,branch_tb,shift_tb,zone_tb,window_zone_tb,team_leader_tb,agent_tb,client_tb,job_tb,staff_tb,task_tb,customer_tb,staff_attendance_tb,task_request_tb,time_period_tb,complaint_ticket_tb,delay_task_request_tb,agent_checkin_checkout_tb
+from .models import admin_tb,branch_tb,shift_tb,zone_tb,window_zone_tb,team_leader_tb,agent_tb,client_tb,job_tb,staff_tb,task_tb,customer_tb,staff_attendance_tb,task_request_tb,time_period_tb,complaint_ticket_tb,delay_task_request_tb,agent_checkin_checkout_tb,message_tb
 from django.shortcuts import redirect
 from django.contrib import messages
 from datetime import datetime
@@ -2525,29 +2525,39 @@ def listAgentAttendace(request):
 
 
 @cache_control(no_cache=True,must_revalidate=True,no_store=True)
-def exportReportCSV(request):
-    get_distinct_data   = request.session['get_distinct_data']
-    print(get_distinct_data)
-    # csv header
-    fieldnames      = ['name', 'area', 'country_code2', 'country_code3']
+def listClientMessage(request):
+    if request.session.has_key('clientId'):
+        client_id                   = request.session['clientId']
+        get_team_leader             = task_tb.objects.all().filter(client_id=client_id).values('team_leader_id').distinct()
+        get_admin                   = admin_tb.objects.all().get()
 
-    # csv data
-    rows = [
-        {'name': 'Albania',
-        'area': 28748,
-        'country_code2': 'AL',
-        'country_code3': 'ALB'},
-        {'name': 'Algeria',
-        'area': 2381741,
-        'country_code2': 'DZ',
-        'country_code3': 'DZA'},
-        {'name': 'American Samoa',
-        'area': 199,
-        'country_code2': 'AS',
-        'country_code3': 'ASM'}
-    ]
+        admin_client_last_msg       = message_tb.objects.all().filter(client_id=client_id,admin_id=get_admin.id).last()
+        unread_message_count        = message_tb.objects.all().filter(client_id=client_id,admin_id=get_admin.id,sender='Admin',status='Send').count()
+        time                        = admin_client_last_msg.time
+        print(time)
+        d                           = datetime.strptime("10:00", "%H:%M")
+        print(d)
+        d.datetime("%Y-%m-%d %H:%M %p")
+        print(time.strftime("%H:%M %p"))
+        print(d)
 
-    with open('countries.csv', 'w', encoding='UTF8', newline='') as f:
-        writer = csv.DictWriter(f, fieldnames=fieldnames)
-        writer.writeheader()
-        writer.writerows(rows)
+        list_all_tl                 = [{'id':get_admin.id,'name' : 'Admin','user_role' : 'Admin','message':'' if not admin_client_last_msg.message else admin_client_last_msg.message,'unread':unread_message_count}]
+
+        for team_leader in get_team_leader:
+            tl_name                 = team_leader_tb.objects.all().filter(id=team_leader['team_leader_id']).get()
+            tl_client_last_msg      = message_tb.objects.all().filter(client_id=client_id,team_leader_id=team_leader['team_leader_id']).last()
+            tl_unread_message_count = message_tb.objects.all().filter(client_id=client_id,team_leader_id=team_leader['team_leader_id'],sender='Team Leader',status='Send').count()
+           
+
+            tl_array                = {}
+            tl_array['id']          = tl_name.id
+            tl_array['name']        = tl_name.name
+            tl_array['user_role']   = 'Team Leader'
+            tl_array['message']     = '' if not tl_client_last_msg else tl_client_last_msg
+            tl_array['unread']      = tl_unread_message_count
+
+            list_all_tl.append(tl_array)
+      
+        return render(request,'client/client_message.html',{'team_leader' : list_all_tl})
+    else:
+        return redirect('client-login') 

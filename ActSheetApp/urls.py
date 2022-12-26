@@ -82,6 +82,7 @@ urlpatterns = [
      path('agent-attendance/', views.agentCheckInCheckOut, name='agent-attendance'),
      path('list-agent-attendance/', views.listAgentAttendace, name='list-agent-attendance'),
 
+     path('message/', views.listClientMessage, name='client-message'),
 ]    
 
 if settings.DEBUG:
