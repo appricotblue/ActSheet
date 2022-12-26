@@ -28,7 +28,7 @@
                                 <h4 class="card-title">Add Staff</h4>
                             </div>
                         </div>
-                        <form class="forms-sample" action="{% url 'add-staff' %}" method="post">
+                        <form class="forms-sample" action="{% url 'add-staff' %}" method="post" enctype="multipart/form-data">
                             {% csrf_token %}
                             <div class="form-group">
                                 <label for="exampleInputName1">Name</label>
@@ -45,6 +45,10 @@
                             <div class="form-group">
                                 <label for="exampleInputName1">Designation</label>
                                 <input type="text" name="designation" class="form-control" id="exampleInputName1" placeholder="Designation" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="exampleInputName1">Image</label>
+                                <input type="file" name="image" class="form-control" id="exampleInputName1">
                             </div>
                             <div class="form-group">
                                 <label for="exampleInputName1">Client</label>

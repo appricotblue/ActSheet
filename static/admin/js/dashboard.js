@@ -1122,31 +1122,23 @@
 				options: transactionsOptions
 			});
 		}
-		var staff1_name = $('#staff_name1').val();
-		var staff2_name = $('#staff_name2').val();
-		var staff3_name = $('#staff_name3').val();
-		var staff4_name = $('#staff_name4').val();
-		var staff5_name = $('#staff_name5').val();
-		var staff6_name = $('#staff_name6').val();
-		var staff7_name = $('#staff_name7').val();
-		var staff8_name = $('#staff_name8').val();
-		var staff9_name = $('#staff_name9').val();
 
-		var staff1_conversion = $('#conversion_perc1').val();
-		var staff2_conversion = $('#conversion_perc2').val();
-		var staff3_conversion = $('#conversion_perc3').val();
-		var staff4_conversion = $('#conversion_perc4').val();
-		var staff5_conversion = $('#conversion_perc5').val();
-		var staff6_conversion = $('#conversion_perc6').val();
-		var staff7_conversion = $('#conversion_perc7').val();
-		var staff8_conversion = $('#conversion_perc8').val();
-		var staff9_conversion = $('#conversion_perc9').val();
+		var graph_array_length	= $('#graphDataLength').val();
+		var staff_conversion_pct 	= [];
+		var staff_type_name 		= [];
+		for (var i = 1; i <= graph_array_length; i++) 
+		{
+			var staff_name 	= $('#staff_name'+i).val();
+			var staff_pct 	= parseInt($('#conversion_perc'+i).val());
+			staff_conversion_pct.push(staff_pct);
+			staff_type_name.push(staff_name)
+		}
 
 		var supportTrackerData = {
-			labels: [staff1_name, staff2_name, staff3_name, staff4_name, staff5_name, staff6_name, staff7_name, staff8_name, staff9_name, ],
+			labels: staff_type_name,
 			datasets: [{
 				label: 'Percentage of conversion',
-				data: [staff1_conversion, staff2_conversion, staff3_conversion, staff4_conversion, staff5_conversion, staff6_conversion, staff7_conversion, staff8_conversion, staff9_conversion],
+				data: staff_conversion_pct,
 				backgroundColor: [
 					'#4CB8C4', '#4CB8C4', '#4CB8C4', '#4CB8C4', '#4CB8C4', '#4CB8C4', '#4CB8C4', '#4CB8C4', '#4CB8C4', 
 				],

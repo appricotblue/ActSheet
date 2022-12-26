@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.views.decorators.cache import cache_control
-from .models import admin_tb,branch_tb,shift_tb,zone_tb,window_zone_tb,team_leader_tb,agent_tb,client_tb,job_tb,staff_tb,task_tb,customer_tb,staff_attendance_tb,task_request_tb,time_period_tb
+from .models import admin_tb,branch_tb,shift_tb,zone_tb,window_zone_tb,team_leader_tb,agent_tb,client_tb,job_tb,staff_tb,task_tb,customer_tb,staff_attendance_tb,task_request_tb,time_period_tb,complaint_ticket_tb,delay_task_request_tb,agent_checkin_checkout_tb
 from django.shortcuts import redirect
 from django.contrib import messages
 from datetime import datetime
@@ -22,6 +22,8 @@ import numpy as np
 from channels.db import database_sync_to_async
 from django.contrib.sessions.models import Session
 from django.utils import timezone
+from .forms import imgForm, imgForm1
+import csv
 # Create your views here.
 
 
@@ -114,8 +116,18 @@ def addNewBranch(request):
             name            = request.POST['name']
             getclient_id    = request.POST['client_id']
             client_id       = client_tb.objects.get(id=getclient_id)
+            image_file      = imgForm(request.POST,request.FILES)
+            image_file1     = imgForm1(request.POST,request.FILES)
             now             = datetime.now()
-            a               = branch_tb(name=name,client_id=client_id,created_at=now,updated_at=now)
+            image           = None
+            image1          = None
+
+            if image_file.is_valid():
+                image       = image_file.cleaned_data['image']
+            if image_file1.is_valid():
+                image1      = image_file1.cleaned_data['image1']
+
+            a               = branch_tb(name=name,client_id=client_id,layout=image,document=image1,created_at=now,updated_at=now)
             a.save()
             messages.success(request, 'Successfully added.')
             return redirect('list-branch')
@@ -132,13 +144,26 @@ def addNewBranch(request):
 def updateBranch(request):
     if request.session.has_key('adminId'):
         if request.method=="POST":
-            branch_id       = request.GET['id']
-            name            = request.POST['name']
-            getclient_id    = request.POST['client_id']
-            client_id       = branch_tb.objects.get(id=getclient_id)
-            now             = datetime.now()
+            branch_id           = request.GET['id']
+            name                = request.POST['name']
+            getclient_id        = request.POST['client_id']
+            client_id           = branch_tb.objects.get(id=getclient_id)
+            now                 = datetime.now()
+            image_file          = imgForm(request.POST,request.FILES)
+            image_file1         = imgForm1(request.POST,request.FILES)
 
             branch_tb.objects.all().filter(id=branch_id).update(name=name,client_id=client_id,updated_at=now)
+
+            if image_file.is_valid():
+                image           = image_file.cleaned_data['image']
+                mymodel         = branch_tb.objects.get(id=branch_id)
+                mymodel.layout  = image
+                mymodel.save()
+            if image_file1.is_valid():
+                image1          = image_file1.cleaned_data['image1']
+                mymodel         = branch_tb.objects.get(id=branch_id)
+                mymodel.document= image1
+                mymodel.save()
 
             messages.success(request, 'Changes successfully updated.')
             return redirect('list-branch')
@@ -847,6 +872,10 @@ def addStaff(request):
             branch_id           = branch_tb.objects.get(id=getbranch_id)
             getclient_id        = request.POST['client_id']
             client_id           = client_tb.objects.get(id=getclient_id)
+            image_file          = imgForm(request.POST,request.FILES) 
+            
+            image               = None
+
             now                 = datetime.now()
 
             get_staff           = staff_tb.objects.all().filter(email=email)
@@ -855,7 +884,10 @@ def addStaff(request):
                 messages.error(request, 'Email already exist')
                 return redirect('add-staff')
             else:
-                a               = staff_tb(name=name,email=email,phone=phone,designation=designation,total_hrs=total_hrs,required_hrs=required_hrs,max_break_time=max_break_time,branch_id=branch_id,shift_id=shift_id,client_id=client_id,created_at=now,updated_at=now)
+                if image_file.is_valid():
+                    image=image_file.cleaned_data['image']
+
+                a               = staff_tb(name=name,email=email,phone=phone,designation=designation,total_hrs=total_hrs,required_hrs=required_hrs,max_break_time=max_break_time,branch_id=branch_id,shift_id=shift_id,client_id=client_id,image=image,created_at=now,updated_at=now)
                 a.save()
            
             messages.success(request, 'Successfully added.')
@@ -864,6 +896,7 @@ def addStaff(request):
             branch_list         = branch_tb.objects.all()
             shift_list          = shift_tb.objects.all()
             client_list         = client_tb.objects.all()
+
             return render(request,'admin/add_staff.html',{'branch_list' : branch_list,'shift_list' : shift_list,'client_list' : client_list})
     else:
         return redirect('admin-login')
@@ -888,8 +921,9 @@ def updateStaff(request):
             branch_id           = branch_tb.objects.get(id=getbranch_id)
             getclient_id        = request.POST['client_id']
             client_id           = client_tb.objects.get(id=getclient_id)
-            now                 = datetime.now()
+            image_file          = imgForm(request.POST,request.FILES)
 
+            now                 = datetime.now()
             
             get_staff           = staff_tb.objects.all().filter(email=email).exclude(id=staff_id)
 
@@ -897,7 +931,13 @@ def updateStaff(request):
                 messages.error(request, 'Email already exist')
                 return redirect('/edit-staff?id='+ str(staff_id))
             else:
-                staff_tb.objects.all().filter(id=staff_id).update(name=name,email=email,phone=phone,designation=designation,total_hrs=total_hrs,required_hrs=required_hrs,max_break_time=max_break_time,branch_id=branch_id,shift_id=shift_id,client_id=client_id,updated_at=now)
+                update_data     = staff_tb.objects.all().filter(id=staff_id).update(name=name,email=email,phone=phone,designation=designation,total_hrs=total_hrs,required_hrs=required_hrs,max_break_time=max_break_time,branch_id=branch_id,shift_id=shift_id,client_id=client_id,updated_at=now)
+                if image_file.is_valid():
+                    image       = image_file.cleaned_data['image']
+                  
+                    mymodel = staff_tb.objects.get(id=staff_id)
+                    mymodel.image = image
+                    mymodel.save()
 
                 messages.success(request, 'Changes successfully updated.')
                 return redirect('list-staff')
@@ -937,14 +977,76 @@ def deleteStaff(request):
 def listTask(request):
     if request.session.has_key('adminId'):
         task_list           = task_tb.objects.all()
-        return render(request,'admin/list_task.html',{'task_list' : task_list})
+
+        now             = datetime.now()
+
+        date1_year  = int(now.strftime("%y"))
+        date1_month = int(now.strftime("%m"))
+        date1_date  = int(now.strftime("%d"))
+        
+        all_task        = []
+        for task in task_list:
+            end_date    = task.end_date
+            date2_year  = int(end_date.strftime("%y"))
+            date2_month = int(end_date.strftime("%m"))
+            date2_date  = int(end_date.strftime("%d"))
+            
+            d1          = datetime(date1_year,date1_month,date1_date)
+            d2          = datetime(date2_year,date2_month,date2_date)
+
+            taskarray                       = {}
+            taskarray['id']                 = task.id
+            taskarray['task_id']            = task.task_id
+            taskarray['title']              = task.title
+            taskarray['client_id']          = task.client_id.client_id
+            taskarray['job_id']             = task.job_id.title
+            taskarray['start_date']         = task.start_date
+            taskarray['end_date']           = task.end_date
+            taskarray['status']             = task.status
+            taskarray['have_request']       = task.have_request
+            taskarray['have_delay_request'] = task.have_delay_request
+            taskarray['is_expired']         = True if (d2 < d1 and task.status == 'Pending') else False
+            all_task.append(taskarray)
+
+        return render(request,'admin/list_task.html',{'task_list' : all_task})
 
     elif request.session.has_key('agentId'):
         if request.session.has_key('client_id'):
             agent_id        = request.session['agentId']
             client_id       = request.session['client_id']
             task_list       = task_tb.objects.all().filter(agent_id=agent_id,client_id=client_id)
-            return render(request,'admin/list_task.html',{'task_list' : task_list})
+
+            now             = datetime.now()
+
+            date1_year  = int(now.strftime("%y"))
+            date1_month = int(now.strftime("%m"))
+            date1_date  = int(now.strftime("%d"))
+            
+            all_task        = []
+            for task in task_list:
+                end_date    = task.end_date
+                date2_year  = int(end_date.strftime("%y"))
+                date2_month = int(end_date.strftime("%m"))
+                date2_date  = int(end_date.strftime("%d"))
+                
+                d1          = datetime(date1_year,date1_month,date1_date)
+                d2          = datetime(date2_year,date2_month,date2_date)
+
+                taskarray                       = {}
+                taskarray['id']                 = task.id
+                taskarray['task_id']            = task.task_id
+                taskarray['title']              = task.title
+                taskarray['client_id']          = task.client_id.client_id
+                taskarray['job_id']             = task.job_id.title
+                taskarray['start_date']         = task.start_date
+                taskarray['end_date']           = task.end_date
+                taskarray['status']             = task.status
+                taskarray['have_request']       = task.have_request
+                taskarray['have_delay_request'] = task.have_delay_request
+                taskarray['is_expired']     = True if (d2 < d1 and task.status == 'Pending') else False
+                all_task.append(taskarray)
+
+            return render(request,'admin/list_task.html',{'task_list' : all_task})
         else:
             messages.error(request, 'Please select client')
             return redirect('agent-dashboard')
@@ -954,7 +1056,38 @@ def listTask(request):
             team_leader_id  = request.session['teamLeadertId']
             client_id       = request.session['client_id']
             task_list       = task_tb.objects.all().filter(team_leader_id=team_leader_id,client_id=client_id)
-            return render(request,'admin/list_task.html',{'task_list' : task_list})
+            
+            now             = datetime.now()
+
+            date1_year  = int(now.strftime("%y"))
+            date1_month = int(now.strftime("%m"))
+            date1_date  = int(now.strftime("%d"))
+            
+            all_task        = []
+            for task in task_list:
+                end_date    = task.end_date
+                date2_year  = int(end_date.strftime("%y"))
+                date2_month = int(end_date.strftime("%m"))
+                date2_date  = int(end_date.strftime("%d"))
+                
+                d1          = datetime(date1_year,date1_month,date1_date)
+                d2          = datetime(date2_year,date2_month,date2_date)
+
+                taskarray                       = {}
+                taskarray['id']                 = task.id
+                taskarray['task_id']            = task.task_id
+                taskarray['title']              = task.title
+                taskarray['client_id']          = task.client_id.client_id
+                taskarray['job_id']             = task.job_id.title
+                taskarray['start_date']         = task.start_date
+                taskarray['end_date']           = task.end_date
+                taskarray['status']             = task.status
+                taskarray['have_request']       = task.have_request
+                taskarray['have_delay_request'] = task.have_delay_request
+                taskarray['is_expired']         = True if (d2 < d1 and task.status == 'Pending') else False
+                all_task.append(taskarray)
+            
+            return render(request,'admin/list_task.html',{'task_list' : all_task})
         else:
             messages.error(request, 'Please select client')
             return redirect('team-leader-dashboard')
@@ -1099,15 +1232,40 @@ def listCustomer(request):
     if request.session.has_key('adminId'):
         customer_list   = customer_tb.objects.all()
         task_id         = request.GET['id']
+
         return render(request,'admin/list_customer.html',{'customer_list' : customer_list,'task_id' : task_id})
+
+    elif request.session.has_key('teamLeadertId'):
+        team_leader_id  = request.session['teamLeadertId']
+        customer_list   = customer_tb.objects.all().filter(team_leader_id=team_leader_id)
+        task_id         = request.GET['id']
+        task_data       = task_tb.objects.all().filter(id=task_id).get()
+        
+        return render(request,'admin/list_customer.html',{'customer_list' : customer_list,'task_id' : task_id,'submit_tl': task_data.submit_tl})
 
     elif request.session.has_key('agentId'):
         agent_id        = request.session['agentId']
         customer_list   = customer_tb.objects.all().filter(agent_id=agent_id)
         task_id         = request.GET['id']
         task_data       = task_tb.objects.all().filter(id=task_id).get()
+
+        now             = datetime.now()
+
+        date1_year      = int(now.strftime("%y"))
+        date1_month     = int(now.strftime("%m"))
+        date1_date      = int(now.strftime("%d"))
+
+        end_date        = task_data.end_date
+        date2_year      = int(end_date.strftime("%y"))
+        date2_month     = int(end_date.strftime("%m"))
+        date2_date      = int(end_date.strftime("%d"))
         
-        return render(request,'admin/list_customer.html',{'customer_list' : customer_list,'task_id' : task_id,'submit_tl': task_data.submit_tl})
+        d1              = datetime(date1_year,date1_month,date1_date)
+        d2              = datetime(date2_year,date2_month,date2_date)
+
+        is_expired      = True if d2 < d1 and task_data.status == 'Pending' else False 
+        
+        return render(request,'admin/list_customer.html',{'customer_list' : customer_list,'task_id' : task_id,'submit_tl': task_data.submit_tl,'is_expired' : is_expired})
     else:
         return redirect('admin-login')
 
@@ -1175,10 +1333,11 @@ def addNewCustomer(request):
             get_job_data                = job_tb.objects.get(id=job_id.id)
             branch_id                   = get_job_data.branch_id
             client_id                   = task_id.client_id
+            team_leader_id              = task_id.team_leader_id
 
             now                         = datetime.now()
 
-            a                           = customer_tb(date=date,opening_time=opening_time,closing_time=closing_time,customer_id=customer_id,customer_entry_time=customer_entry_time,customer_exit_time=customer_exit_time,dwell_time=dwell_time,single=single,group=group,male=male,female=female,zone_ids=zone_ids,window_zone_ids=window_zone_ids,staff_ids=staff_ids,repeat_customer=repeat_customer,repeat_customer_id=repeat_customer_id,repeat_customer_visit_date=repeat_customer_visit_date,tray=tray,refreshment=refreshment,gloves=gloves,backup_stock=backup_stock,business_card=business_card,body_language=body_language,full_uniform=full_uniform,conversion_status=conversion_status,conversion_percentage=conversion_percentage,conversion_to=conversion_to,converted_count=converted_count,invoice_time=invoice_time,reason_for_no_conversion=reason_for_no_conversion,remark=remark,task_id=task_id,agent_id=agent_id,submit_tl=submit_tl,job_id=job_id,branch_id=branch_id,no_of_male=no_of_male,no_of_female=no_of_female,client_id=client_id,time_period_id=time_period_id,created_at=now,updated_at=now)
+            a                           = customer_tb(date=date,opening_time=opening_time,closing_time=closing_time,customer_id=customer_id,customer_entry_time=customer_entry_time,customer_exit_time=customer_exit_time,dwell_time=dwell_time,single=single,group=group,male=male,female=female,zone_ids=zone_ids,window_zone_ids=window_zone_ids,staff_ids=staff_ids,repeat_customer=repeat_customer,repeat_customer_id=repeat_customer_id,repeat_customer_visit_date=repeat_customer_visit_date,tray=tray,refreshment=refreshment,gloves=gloves,backup_stock=backup_stock,business_card=business_card,body_language=body_language,full_uniform=full_uniform,conversion_status=conversion_status,conversion_percentage=conversion_percentage,conversion_to=conversion_to,converted_count=converted_count,invoice_time=invoice_time,reason_for_no_conversion=reason_for_no_conversion,remark=remark,task_id=task_id,agent_id=agent_id,submit_tl=submit_tl,job_id=job_id,branch_id=branch_id,no_of_male=no_of_male,no_of_female=no_of_female,client_id=client_id,time_period_id=time_period_id,team_leader_id=team_leader_id,created_at=now,updated_at=now)
             a.save()
            
             messages.success(request, 'Successfully added.')
@@ -1253,11 +1412,12 @@ def updateCustomer(request):
             job_id                      = task_id.job_id
             get_job_data                = job_tb.objects.get(id=job_id.id)
             branch_id                   = get_job_data.branch_id
-            client_id                  = task_id.client_id
+            client_id                   = task_id.client_id
+            team_leader_id              = task_id.team_leader_id
 
             now                         = datetime.now()
 
-            customer_tb.objects.all().filter(id=get_customer_id).update(date=date,opening_time=opening_time,closing_time=closing_time,customer_id=customer_id,customer_entry_time=customer_entry_time,customer_exit_time=customer_exit_time,dwell_time=dwell_time,single=single,group=group,male=male,female=female,zone_ids=zone_ids,window_zone_ids=window_zone_ids,staff_ids=staff_ids,repeat_customer=repeat_customer,repeat_customer_id=repeat_customer_id,repeat_customer_visit_date=repeat_customer_visit_date,tray=tray,refreshment=refreshment,gloves=gloves,backup_stock=backup_stock,business_card=business_card,body_language=body_language,full_uniform=full_uniform,conversion_status=conversion_status,conversion_percentage=conversion_percentage,conversion_to=conversion_to,converted_count=converted_count,invoice_time=invoice_time,reason_for_no_conversion=reason_for_no_conversion,remark=remark,task_id=task_id,agent_id=agent_id,submit_tl=submit_tl,job_id=job_id,branch_id=branch_id,no_of_male=no_of_male,no_of_female=no_of_female,client_id=client_id,time_period_id=time_period_id,updated_at=now)
+            customer_tb.objects.all().filter(id=get_customer_id).update(date=date,opening_time=opening_time,closing_time=closing_time,customer_id=customer_id,customer_entry_time=customer_entry_time,customer_exit_time=customer_exit_time,dwell_time=dwell_time,single=single,group=group,male=male,female=female,zone_ids=zone_ids,window_zone_ids=window_zone_ids,staff_ids=staff_ids,repeat_customer=repeat_customer,repeat_customer_id=repeat_customer_id,repeat_customer_visit_date=repeat_customer_visit_date,tray=tray,refreshment=refreshment,gloves=gloves,backup_stock=backup_stock,business_card=business_card,body_language=body_language,full_uniform=full_uniform,conversion_status=conversion_status,conversion_percentage=conversion_percentage,conversion_to=conversion_to,converted_count=converted_count,invoice_time=invoice_time,reason_for_no_conversion=reason_for_no_conversion,remark=remark,task_id=task_id,agent_id=agent_id,submit_tl=submit_tl,job_id=job_id,branch_id=branch_id,no_of_male=no_of_male,no_of_female=no_of_female,client_id=client_id,time_period_id=time_period_id,team_leader_id=team_leader_id,updated_at=now)
 
             messages.success(request, 'Changes successfully updated.')
             return redirect('/list-customer?id='+ str(task_id.id))
@@ -1399,6 +1559,7 @@ def getStaffData(request):
 
 
 
+@cache_control(no_cache=True,must_revalidate=True,no_store=True)
 def getReport(request):
     if request.session.has_key('adminId') or request.session.has_key('teamLeadertId') or request.session.has_key('clientId'):
         if request.method=="POST":
@@ -1411,12 +1572,11 @@ def getReport(request):
             client_id           = client_tb.objects.get(id=get_client_id)
             all_clients         = []
 
-            
 
-            staff_list          = staff_tb.objects.all()
-            branch_list         = branch_tb.objects.all().values()
-            zone_list           = zone_tb.objects.all().values()
-            window_zone_list    = window_zone_tb.objects.all().values()
+            staff_list          = staff_tb.objects.all().filter(client_id=client_id).values()
+            branch_list         = branch_tb.objects.all().filter(client_id=client_id).values()
+            zone_list           = zone_tb.objects.all().filter(client_id=client_id).values()
+            window_zone_list    = window_zone_tb.objects.filter(client_id=client_id).all().values()
 
             if request.session.has_key('adminId'):
                 all_clients     = client_tb.objects.all()
@@ -1464,6 +1624,7 @@ def getReport(request):
                     my_dict['converted_count']  =  x['converted_count']
                     my_dict['pct']              =  x['pct']
                     get_distinct_data.append(my_dict)
+
 
             elif category == 'branch':
                 get_data_list       = []
@@ -1628,6 +1789,29 @@ def getReport(request):
 
                             time_data.append(time_list_array)
 
+                        single                  = 0
+                        group                   = 0
+                        total_count             = 0
+                        male                    = 0
+                        female                  = 0
+                        converted_count         = 0
+                        conversion_percentage   = 0
+                        total_entry             = len(time_data)
+                        for total in time_data:
+                            time_period             = 'Total'
+                            single                  = single + total['single']
+                            group                   = group + total['group']
+                            total_count             = total_count +  total['total']
+                            male                    = male +  total['male']
+                            female                  = female +  total['female']
+                            
+                            converted_count         =  converted_count + total['converted_count']
+                            conversion_percentage   =  conversion_percentage + total['pct']
+                            
+                        total_pct                   = 0 if total_entry == 0 else round(conversion_percentage / total_entry)
+                        data_total_sum              = {'time_period' : time_period,'single' : single,'group' :group,'single' :single,'group':group,'total':total_count,'male':male,'female':female,'converted_count':converted_count,'pct':total_pct}
+                        time_data.append(data_total_sum)
+
                         branch_list_array                       = {}
                         branch_list_array[branch.name]          = time_data
                         time_wise_data.append(branch_list_array)
@@ -1653,6 +1837,29 @@ def getReport(request):
                             time_list_array['pct']              = 0 if (len(get_staff_data) == 0) else get_staff_data[0]['pct']
 
                             time_data.append(time_list_array)
+
+                        single                  = 0
+                        group                   = 0
+                        total_count             = 0
+                        male                    = 0
+                        female                  = 0
+                        converted_count         = 0
+                        conversion_percentage   = 0
+                        total_entry             = len(time_data)
+                        for total in time_data:
+                            time_period             = 'Total'
+                            single                  = single + total['single']
+                            group                   = group + total['group']
+                            total_count             = total_count +  total['total']
+                            male                    = male +  total['male']
+                            female                  = female +  total['female']
+                            
+                            converted_count         =  converted_count + total['converted_count']
+                            conversion_percentage   =  conversion_percentage + total['pct']
+                            
+                        total_pct                   = 0 if total_entry == 0 else round(conversion_percentage / total_entry)
+                        data_total_sum              = {'time_period' : time_period,'single' : single,'group' :group,'single' :single,'group':group,'total':total_count,'male':male,'female':female,'converted_count':converted_count,'pct':total_pct}
+                        time_data.append(data_total_sum)
 
                         staff_list_array                        = {}
                         staff_list_array[staff.name]            = time_data
@@ -1696,14 +1903,48 @@ def getReport(request):
                         performance_data.append(array_data)
 
                 performance_data.sort(key=lambda x: x.get('pct'), reverse=True)
-                print(performance_data)    
-                return render(request,'admin/performance_report.html',{'get_data' : performance_data,'request_data' : request_data,'staff_list' :staff_list,'branch_list' :branch_list,'zone_list' :zone_list,'window_zone_list':window_zone_list,'clients' :all_clients})
+
+                total_count             = 0
+                converted_count         = 0
+                conversion_percentage   = 0
+                total_entry             = len(performance_data)
+                for total in performance_data:
+                    total_count             =  total_count + total['total']
+                    converted_count         =  converted_count + total['converted_count']
+                    conversion_percentage   =  conversion_percentage + total['pct']
+                    
+                total_pct                   = 0 if total_entry == 0 else round(conversion_percentage / total_entry)
+                data_total_sum              = {'total':total_count,'converted_count':converted_count,'pct':total_pct}
+                   
+                return render(request,'admin/performance_report.html',{'get_data' : performance_data,'data_total_sum':data_total_sum,'request_data' : request_data,'staff_list' :staff_list,'branch_list' :branch_list,'zone_list' :zone_list,'window_zone_list':window_zone_list,'clients' :all_clients})
             ############################################################################################################################################
                         
             get_distinct_data.sort(key=lambda x: x.get('pct'), reverse=True)
 
             if selected_type == 'consolidated':
-                return render(request,'admin/consolidated_report.html',{'get_data' : get_distinct_data,'graph_data' :get_distinct_data[:9],'length' :len(get_distinct_data),'request_data' : request_data,'staff_list' :staff_list,'branch_list' :branch_list,'zone_list' :zone_list,'window_zone_list':window_zone_list,'clients' : all_clients})
+
+                sum_male            = 0
+                sum_female          = 0
+                total_count         = 0
+                sum_single          = 0
+                sum_group           = 0
+                sum_converted_count = 0
+                total_pct           = 0
+                total_entry         = len(get_distinct_data)
+                
+                for total in get_distinct_data:
+                    sum_male                = sum_male +  total['male']
+                    sum_female              = sum_female +  total['female']
+                    total_count             = total_count +  total['total']
+                    sum_single              = sum_single + total['single']
+                    sum_group               = sum_group + total['group']
+                    sum_converted_count     = sum_converted_count + total['converted_count']
+                    sum_pct                 = total_pct + total['pct'] 
+
+                total_pct                   = 0 if total_entry == 0 else sum_pct / total_entry
+                data_total_sum              = {'sum_male' : sum_male,'sum_female' : sum_female,'total_count' :total_count,'sum_single' :sum_single,'sum_group': sum_group,'sum_converted_count': sum_converted_count,'total_pct':total_pct}
+                
+                return render(request,'admin/consolidated_report.html',{'get_data' : get_distinct_data,'length_graph' : len(get_distinct_data),'graph_data' :get_distinct_data[:9],'length' :len(get_distinct_data),'request_data' : request_data,'staff_list' :staff_list,'branch_list' :branch_list,'zone_list' :zone_list,'window_zone_list':window_zone_list,'clients' : all_clients,'data_total_sum' : data_total_sum})
             else:
                 get_detailed_data_list  = []
                 for get_detailed_data in get_data_list:
@@ -1748,6 +1989,44 @@ def getReport(request):
                         my_dict['converted_count']      =  data['converted_count']
                         my_dict['conversion_percentage']=  data['conversion_percentage']
                         get_all_data.append(my_dict)
+
+                    male                    = 0
+                    female                  = 0
+                    total_count             = 0
+                    single                  = 0
+                    group                   = 0
+                    converted_count         = 0
+                    conversion_percentage   = 0
+                    customer_entry_time     = 'Total'  
+                    customer_exit_time      = ''
+                    staff_name              = ''
+                    zone_ids                = ''
+                    window_zone_ids         = ''
+                    dwell_time              = ''
+                    tray                    = ''
+                    refreshment             = ''
+                    gloves                  = ''
+                    backup_stock            = ''
+                    business_card           = ''
+                    full_uniform            = ''
+                    conversion_status       = ''
+                    total_entry             = len(get_all_data)
+
+                    for total in get_all_data:
+                        date                    = ''
+                        single                  = single + total['single']
+                        group                   = group + total['group']
+                        total_count             = total_count +  total['total']
+                        male                    = male +  total['male']
+                        female                  = female +  total['female']
+                        
+                        converted_count         =  converted_count + total['converted_count']
+                        conversion_percentage   =  conversion_percentage + total['conversion_percentage']
+                        
+                    total_pct                   = 0 if total_entry == 0 else conversion_percentage / total_entry
+                    data_total_sum              = {'date' : date,'customer_entry_time' : customer_entry_time,'customer_exit_time' :customer_exit_time,'single' :single,'group':group,'total':total_count,'male':male,'female':female,'staff_name' :staff_name,'zone_ids': zone_ids,'window_zone_ids': window_zone_ids,'dwell_time':dwell_time,'tray' : tray,'refreshment' :refreshment,'gloves':gloves,'backup_stock':backup_stock,'business_card':business_card,'full_uniform' :full_uniform,'conversion_status':conversion_status,'converted_count':converted_count,'conversion_percentage':total_pct}
+                    get_all_data.append(data_total_sum)
+
                     data_list_array             = {}
                     data_list_array[key[0]]     = get_all_data
                     get_detailed_data_list.append(data_list_array) 
@@ -2086,4 +2365,189 @@ def searchTask(request):
         return redirect('list-task')
 
 
-        
+
+
+@cache_control(no_cache=True,must_revalidate=True,no_store=True)
+def complaintTicket(request):  
+    if request.session.has_key('clientId'):
+        if  request.method=='POST':
+            get_client_id   = request.session['clientId']
+            client_id       = client_tb.objects.get(id=get_client_id)
+            remark          = request.POST['remark']
+            now             = datetime.now()
+
+            get_team_leader = task_tb.objects.filter(client_id=client_id).first()
+
+            a               = complaint_ticket_tb(client_id=client_id,remark=remark,team_leader_id=get_team_leader.team_leader_id,created_at=now,updated_at=now)
+            a.save()
+
+            messages.success(request, 'Success.')
+            return redirect('client-dashboard')
+        else:
+            client_id       = request.session['clientId']
+            task_list       = task_tb.objects.all().filter(client_id=client_id)
+            
+            return render(request,'client/complaint_ticket.html',{'client_id' : client_id,'task_list' : task_list})
+    else:
+        return redirect('admin-login')
+
+
+@cache_control(no_cache=True,must_revalidate=True,no_store=True)
+def listcomplaintTicket(request):  
+    if request.session.has_key('adminId'):
+        all_complaints      = complaint_ticket_tb.objects.all()
+    if request.session.has_key('teamLeadertId'):
+        team_leader_id      = request.session['teamLeadertId']
+        all_complaints      = complaint_ticket_tb.objects.all().filter(team_leader_id=team_leader_id)
+
+    return render(request,'client/lsit_complaint_ticket.html',{'all_complaints' : all_complaints})
+
+
+
+@cache_control(no_cache=True,must_revalidate=True,no_store=True)
+def editComplaintTicketStatus(request):  
+    if request.session.has_key('adminId') or request.session.has_key('teamLeadertId'):
+        if  request.method=='POST':
+            complaint_id    = request.POST['id']
+            status          = request.POST['status']
+            now             = datetime.now()
+
+            complaint_ticket_tb.objects.all().filter(id=complaint_id).update(status=status,updated_at=now)
+
+            messages.success(request, 'Success.')
+            return redirect('list-complaint-tickets')
+        else:
+            complaint_id    = request.GET['id']
+            complaint_data  = complaint_ticket_tb.objects.all().filter(id=complaint_id)
+            
+            return render(request,'client/edit_complaint_ticket.html',{'complaint_data' : complaint_data})
+    else:
+        return redirect('admin-login')
+
+
+@cache_control(no_cache=True,must_revalidate=True,no_store=True)
+def delayTaskRequest(request):
+    if request.session.has_key('agentId'):
+        if  request.method=='POST':
+            get_task_id     = request.POST['id']
+            task_id         = task_tb.objects.get(id=get_task_id)
+            remark          = request.POST['remark']
+
+            team_leader_id  = task_id.team_leader_id
+            agent_id        = task_id.agent_id
+            client_id       = task_id.client_id
+            now             = datetime.now()
+            actual_end_date = task_id.end_date
+
+            print(now)
+            print(actual_end_date)
+
+            a               = delay_task_request_tb(task_id=task_id,remark=remark,team_leader_id=team_leader_id,agent_id=agent_id,client_id=client_id,actual_end_date=actual_end_date,created_at=now,updated_at=now)
+            a.save()
+
+            task_tb.objects.all().filter(id=task_id.id).update(have_delay_request=True,updated_at=now)
+
+            messages.success(request, 'Success.')
+            return redirect('list-task')
+        else:
+            task_id         = request.GET['id']
+            return render(request,'user/delay_request_remark.html',{'task_id' : task_id})
+    else:
+        return redirect('user-login')  
+
+
+@cache_control(no_cache=True,must_revalidate=True,no_store=True)
+def changeStatusOfDelayTaskRequest(request):
+    if request.session.has_key('adminId') or request.session.has_key('teamLeadertId'):
+        if  request.method=='POST':
+            get_task_id     = request.POST['id']
+            task_id         = task_tb.objects.get(id=get_task_id)
+            get_status      = request.POST['status']
+            status          = True if get_status == 'Approve' else False
+            new_end_date    = request.POST['new_end_date']
+            end_date        = new_end_date if get_status == 'Approve' else task_id.end_date
+            
+            now             = datetime.now()
+
+            delay_task_request_tb.objects.all().filter(task_id=task_id.id).update(status=status,new_end_date=new_end_date,updated_at=now)
+            task_tb.objects.all().filter(id=task_id.id).update(end_date=end_date,have_delay_request=False,request_status=get_status,updated_at=now)
+
+            messages.success(request, 'Success.')
+            return redirect('list-task')
+        else:
+            task_id             = request.GET['id']
+            request_data        = delay_task_request_tb.objects.all().filter(task_id=task_id)
+
+            agent_list          = agent_tb.objects.all()
+            team_leader_list    = team_leader_tb.objects.all()
+            return render(request,'admin/approve_delay_task_request.html',{'task_id' : task_id ,'request_data' : request_data,'agent_list' : agent_list,'team_leader_list':team_leader_list})
+    else:
+        return redirect('user-login') 
+
+
+
+def agentCheckInCheckOut(request): 
+    if request.session.has_key('agentId'):
+        status          = request.GET['status']
+        get_agent_id    = request.session['agentId']
+        agent_id        = agent_tb.objects.get(id=get_agent_id)
+        date            = datetime.now()
+        time            = date.strftime("%H:%M:%S")
+        now             = datetime.now()
+
+        a               = agent_checkin_checkout_tb(date=date,time=time,agent_id=agent_id,status=status,created_at=now,updated_at=now)
+        a.save()
+
+    return HttpResponse(json.dumps(True), content_type="application/json")
+
+
+
+
+@cache_control(no_cache=True,must_revalidate=True,no_store=True)
+def listAgentAttendace(request):
+    if request.session.has_key('adminId') or request.session.has_key('teamLeadertId'):
+        if  request.method=='POST':
+            agent_id        = request.POST['id']
+            date_from       = request.POST['date_from']
+            date_to         = request.POST['date_to']
+
+            request_data    = {'date_from' : date_from,'date_to': date_to}
+            attendance_data = agent_checkin_checkout_tb.objects.all().filter(date__range=(date_from, date_to),agent_id=agent_id)
+            return render(request,'admin/list_agent_attendance.html',{'attendance_data' : attendance_data,'agent_id' : agent_id,'request_data' :request_data })
+
+        else:
+            agent_id        = request.GET['id']
+            attendance_data = agent_checkin_checkout_tb.objects.all().filter(agent_id=agent_id).order_by('-id')
+            request_data    = {}
+            return render(request,'admin/list_agent_attendance.html',{'attendance_data' : attendance_data,'agent_id' : agent_id })
+    else:
+        return redirect('user-login') 
+
+
+@cache_control(no_cache=True,must_revalidate=True,no_store=True)
+def exportReportCSV(request):
+    get_distinct_data   = request.session['get_distinct_data']
+    print(get_distinct_data)
+    # csv header
+    fieldnames      = ['name', 'area', 'country_code2', 'country_code3']
+
+    # csv data
+    rows = [
+        {'name': 'Albania',
+        'area': 28748,
+        'country_code2': 'AL',
+        'country_code3': 'ALB'},
+        {'name': 'Algeria',
+        'area': 2381741,
+        'country_code2': 'DZ',
+        'country_code3': 'DZA'},
+        {'name': 'American Samoa',
+        'area': 199,
+        'country_code2': 'AS',
+        'country_code3': 'ASM'}
+    ]
+
+    with open('countries.csv', 'w', encoding='UTF8', newline='') as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows)

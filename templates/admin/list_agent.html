@@ -32,6 +32,7 @@
                                             <th>Email</th>
                                             <th>Phone Number</th>
                                             <th>Team Leader</th>
+                                            <th>Attendance</th>
                                             <th>Action</th>
                                         </tr>
                                     </thead>
@@ -52,6 +53,11 @@
                                             </td>
                                             <td>
                                                 {{x.team_leader_id.name}}
+                                            </td>
+                                            <td>
+                                                <a href="{% url 'list-agent-attendance' %}?id={{x.id}}">
+                                                    <i class="mdi mdi-eye text-primary text-success me-2"></i>
+                                                </a>
                                             </td>
                                             <td>
                                                 <div class="dropdown">

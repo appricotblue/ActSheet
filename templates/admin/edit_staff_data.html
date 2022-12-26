@@ -29,7 +29,7 @@
                             </div>
                         </div>
                         {% for staff in staff_data %}
-                        <form class="forms-sample" action="{% url 'edit-staff' %}?id={{staff.id}}" method="post">
+                        <form class="forms-sample" action="{% url 'edit-staff' %}?id={{staff.id}}" method="post" enctype="multipart/form-data">
                             {% csrf_token %}
                             <div class="form-group">
                                 <label for="exampleInputName1">Name</label>
@@ -46,6 +46,13 @@
                             <div class="form-group">
                                 <label for="exampleInputName1">Designation</label>
                                 <input type="text" name="designation" value="{{staff.designation}}" class="form-control" id="exampleInputName1" placeholder="Designation" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="mb-2" for="exampleInputName1">Image</label>
+                                <p class="mb-3">
+                                    <img src="/media/{{staff.image}}" height="auto" data-enlargeable width="100" style="cursor: zoom-in">
+                                </p>
+                                <input type="file" name="image" class="form-control" id="exampleInputName1">
                             </div>
                             <div class="form-group">
                                 <label for="exampleInputName1">Client</label>
@@ -97,6 +104,35 @@
         </div>
     </div>
 </div>
+<script>
+    $('img[data-enlargeable]').addClass('img-enlargeable').click(function() {
+    var src = $(this).attr('src');
+    var modal;
 
+    function removeModal() {
+        modal.remove();
+        $('body').off('keyup.modal-close');
+    }
+    modal = $('<div>').css({
+        background: 'RGBA(0,0,0,.5) url(' + src + ') no-repeat center',
+        backgroundSize: 'contain',
+        width: '100%',
+        height: '100%',
+        position: 'fixed',
+        zIndex: '10000',
+        top: '0',
+        left: '0',
+        cursor: 'zoom-out'
+    }).click(function() {
+        removeModal();
+    }).appendTo('body');
+    //handling ESC
+    $('body').on('keyup.modal-close', function(e) {
+        if (e.key === 'Escape') {
+        removeModal();
+        }
+    });
+    });
+</script>
 
 {% endblock %}

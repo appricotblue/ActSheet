@@ -22,6 +22,8 @@ class client_tb(models.Model):
 class branch_tb(models.Model):
 	name=models.CharField(max_length=100,default='')
 	client_id=models.ForeignKey(client_tb,on_delete=models.CASCADE,default='')
+	layout=models.ImageField(upload_to='image',null=True)
+	document=models.ImageField(upload_to='image',null=True)
 	created_at=models.DateTimeField(max_length=100,default='')
 	updated_at=models.DateTimeField(max_length=100,default='')
 
@@ -103,6 +105,7 @@ class staff_tb(models.Model):
 	client_id=models.ForeignKey(client_tb,on_delete=models.CASCADE,default='')
 	branch_id=models.ForeignKey(branch_tb,on_delete=models.CASCADE,default='')
 	status=models.CharField(max_length=100,default='',null=True)
+	image=models.ImageField(upload_to='image',null=True)
 	created_at=models.DateTimeField(max_length=100,default='')
 	updated_at=models.DateTimeField(max_length=100,default='')
 
@@ -125,6 +128,8 @@ class task_tb(models.Model):
 	client_id=models.ForeignKey(client_tb,on_delete=models.CASCADE,default='')
 	have_request=models.BooleanField(max_length=100,default=0)
 	request_status=models.CharField(max_length=100,default='',null=True)
+	have_delay_request=models.BooleanField(max_length=100,default=0)
+	delay_request_status=models.CharField(max_length=100,default='',null=True)
 	created_at=models.DateTimeField(max_length=100,default='')
 	updated_at=models.DateTimeField(max_length=100,default='')
 
@@ -176,6 +181,7 @@ class customer_tb(models.Model):
 	no_of_female=models.IntegerField(default=0,null=True)
 	time_period_id=models.ForeignKey(time_period_tb,on_delete=models.CASCADE,default='')
 	client_id=models.ForeignKey(client_tb,on_delete=models.CASCADE,default='')
+	team_leader_id=models.ForeignKey(team_leader_tb,on_delete=models.CASCADE,default='')
 	created_at=models.DateTimeField(max_length=100,default='')
 	updated_at=models.DateTimeField(max_length=100,default='')
 
@@ -208,5 +214,38 @@ class task_request_tb(models.Model):
 	team_leader_id=models.ForeignKey(team_leader_tb,on_delete=models.CASCADE,default='')
 	remark=models.TextField(default='')
 	status=models.BooleanField(max_length=100,default=0)
+	created_at=models.DateTimeField(max_length=100,default='')
+	updated_at=models.DateTimeField(max_length=100,default='')
+
+
+
+class complaint_ticket_tb(models.Model):
+	team_leader_id=models.ForeignKey(team_leader_tb,on_delete=models.CASCADE,default='')
+	remark=models.TextField(default='')
+	client_id=models.ForeignKey(client_tb,on_delete=models.CASCADE,default='')
+	status=models.CharField(max_length=100,default='Pending')
+	created_at=models.DateTimeField(max_length=100,default='')
+	updated_at=models.DateTimeField(max_length=100,default='')
+
+
+class delay_task_request_tb(models.Model):
+	task_id=models.ForeignKey(task_tb,on_delete=models.CASCADE,default='')
+	agent_id=models.ForeignKey(agent_tb,on_delete=models.CASCADE,default='')
+	team_leader_id=models.ForeignKey(team_leader_tb,on_delete=models.CASCADE,default='')
+	remark=models.TextField(default='')
+	status=models.BooleanField(max_length=100,default=0)
+	actual_end_date=models.CharField(max_length=100,default='')
+	new_end_date=models.CharField(max_length=100,default='',null=True)
+	client_id=models.ForeignKey(client_tb,on_delete=models.CASCADE,default='')
+	status_changed_by=models.CharField(max_length=100,default='',null=True)
+	created_at=models.DateTimeField(max_length=100,default='')
+	updated_at=models.DateTimeField(max_length=100,default='')
+
+
+class agent_checkin_checkout_tb(models.Model):
+	date=models.DateTimeField(max_length=100,default='')
+	time=models.CharField(max_length=100,default='')
+	agent_id=models.ForeignKey(agent_tb,on_delete=models.CASCADE,default='')
+	status=models.CharField(max_length=100,default='')
 	created_at=models.DateTimeField(max_length=100,default='')
 	updated_at=models.DateTimeField(max_length=100,default='')

@@ -18,7 +18,7 @@
                             </div>
                         </div>
                         {% for branch in branch_data%}
-                        <form class="forms-sample" action="{% url 'edit-branch' %}?id={{branch.id}}" method="post">
+                        <form class="forms-sample" action="{% url 'edit-branch' %}?id={{branch.id}}" method="post" enctype="multipart/form-data">
                             {% csrf_token %}
                             <div class="form-group">
                                 <label for="exampleInputName1">Name</label>
@@ -33,6 +33,20 @@
                                     {% endfor %}
                                 </select>
                             </div>
+                            <div class="form-group">
+                                <label for="exampleInputName1">Layout</label>
+                                <p class="mb-3">
+                                    <img src="/media/{{branch.layout}}" height="auto" data-enlargeable width="100" style="cursor: zoom-in">
+                                </p>
+                                <input type="file" name="image" class="form-control" id="exampleInputName1">
+                            </div>
+                            <div class="form-group">
+                                <label for="exampleInputName1">Upload File</label>
+                                <p class="mb-3">
+                                    <img src="/media/{{branch.document}}" height="auto" data-enlargeable width="100" style="cursor: zoom-in">
+                                </p>
+                                <input type="file" name="image1" class="form-control" id="exampleInputName1">
+                            </div>
                             <div>
                                 <button type="submit" class="btn btn-primary btn-submit me-2">Submit</button>
                             </div>
@@ -44,6 +58,35 @@
         </div>
     </div>
 </div>
+<script>
+    $('img[data-enlargeable]').addClass('img-enlargeable').click(function() {
+    var src = $(this).attr('src');
+    var modal;
 
+    function removeModal() {
+        modal.remove();
+        $('body').off('keyup.modal-close');
+    }
+    modal = $('<div>').css({
+        background: 'RGBA(0,0,0,.5) url(' + src + ') no-repeat center',
+        backgroundSize: 'contain',
+        width: '100%',
+        height: '100%',
+        position: 'fixed',
+        zIndex: '10000',
+        top: '0',
+        left: '0',
+        cursor: 'zoom-out'
+    }).click(function() {
+        removeModal();
+    }).appendTo('body');
+    //handling ESC
+    $('body').on('keyup.modal-close', function(e) {
+        if (e.key === 'Escape') {
+        removeModal();
+        }
+    });
+    });
+</script>
 
 {% endblock %}

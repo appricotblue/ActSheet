@@ -1,0 +1,63 @@
+{% extends "admin/layouts/app.html" %}
+{% block content %}
+<div class="container-fluid page-body-wrapper">
+    <div class="main-panel">
+      <div class="content-wrapper">
+        <div class="row">
+            <div class="col-12 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <a href="{% url 'list-complaint-tickets' %}">
+                                <div style = "display : inline-block" class="me-2">
+                                    <i class="fa fa-arrow-left card-title"></i>
+                                </div>
+                            </a>
+                            <div style = "display : inline-block">
+                                <h4 class="card-title">Complaint</h4>
+                            </div>
+                        </div>
+                        <form class="forms-sample" action="{% url 'edit-complaint-ticket' %}" method="post">
+                            {% csrf_token %}
+                            {% for complaint in complaint_data%}
+                            <input type="hidden" name="id" value="{{complaint.id}}">
+                            <div class="form-group">
+                                <label for="exampleInputName1">Client</label>
+                                <input type="text" class="form-control" value="{{complaint.client_id.name}}" readonly>
+                            </div>
+                            {% if not request.session.teamLeadertId %}
+                            <div class="form-group">
+                                <label for="exampleInputName1">Team Leader</label>
+                                <input type="text" class="form-control" value="{{complaint.team_leader_id.name}}" readonly>
+                            </div>
+                            {% endif %}
+                            <div class="form-group">
+                                <label for="exampleInputName1">Isse Faced</label>
+                                <textarea  class="form-control" name="remark" rows="4" cols="50" readonly>{{complaint.remark}}</textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="exampleInputName1">Created Date</label>
+                                <input type="text" class="form-control" value="{{ complaint.created_at|date:'M d, Y' }}" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="exampleInputName1">Status</label>
+                                <select name="status" class="form-control category" id="exampleInputName1" style="height: 33px;" required>
+                                    <option value="Pending" {% if complaint.status == 'Pending' %} selected {% endif %}>Pending</option>
+                                    <option value="Accept" {% if complaint.status == 'Accept' %} selected {% endif %}>Accept</option>
+                                    <option value="Solved" {% if complaint.status == 'Solved' %} selected {% endif %}>Solved</option>
+                                </select>
+                            </div>
+                            {% endfor %}
+                            <div>
+                                <button type="submit" class="btn btn-primary btn-submit me-2">Submit</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

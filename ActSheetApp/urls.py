@@ -72,7 +72,17 @@ urlpatterns = [
      path('search-task/', views.searchTask, name='search-task'),
      path('change-request-status/', views.changeStatusOfTaskRequest, name='change-request-status'),
 
-]
+     path('complaint-ticket/', views.complaintTicket, name='complaint-ticket'),
+     path('list-complaint-tickets/', views.listcomplaintTicket, name='list-complaint-tickets'),
+     path('edit-complaint-ticket/', views.editComplaintTicketStatus, name='edit-complaint-ticket'),
+
+     path('delay-task-request/', views.delayTaskRequest, name='delay-task-request'),
+     path('change-delay-request-status/', views.changeStatusOfDelayTaskRequest, name='change-delay-request-status'),
+
+     path('agent-attendance/', views.agentCheckInCheckOut, name='agent-attendance'),
+     path('list-agent-attendance/', views.listAgentAttendace, name='list-agent-attendance'),
+
+]    
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)

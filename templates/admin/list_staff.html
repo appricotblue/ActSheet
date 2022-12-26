@@ -27,7 +27,7 @@
                                 <table class="table table-striped">
                                     <thead>
                                         <tr>
-                                            <th>Sl. No</th>
+                                            <th></th>
                                             <th>Name</th>
                                             <th>Branch</th>
                                             <th>Shift</th>
@@ -40,7 +40,7 @@
                                         {% for x in staff_list %}
                                         <tr>
                                             <td class="py-1">
-                                                {{x.id}}
+                                                <img src="/media/{{x.image}}" width="80px" height="auto">
                                             </td>
                                             <td>
                                                 {{x.name}}

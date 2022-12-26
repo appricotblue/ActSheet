@@ -92,13 +92,6 @@
                     <div class="col-lg-12 grid-margin stretch-card">
                         <div class="card"  style="background: rgba(232, 247, 255);">
                             <div class="card-body">
-                                <div>
-                                {% if messages %}
-                                    {% for message in messages %}
-                                        <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}" role="alert">{{ message }}</div>
-                                    {% endfor %}
-                                {% endif %}
-                                </div>
                                 <div class="table-responsive">
                                     {% if pending_task %}
                                     <table class="table table-striped">

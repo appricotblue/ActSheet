@@ -145,3 +145,6 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'silnaanil40@gmail.com'
 EMAIL_HOST_PASSWORD = 'ugdhnmmvgyterjth'
+
+
+TEMPLATES[0]['OPTIONS']['context_processors'].append("ActSheetApp.common_variable.getDataCountAllTemplate")

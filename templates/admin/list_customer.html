@@ -8,12 +8,18 @@
                     <h4 class="card-title div-title">Customers</h4>
                 </div>
                 {% if request.session.agentId and submit_tl == False or not request.session.agentId %}
-                <div class="col" style="text-align: right;">
-                    {% if request.session.agentId and customer_list != None %}
-                    <a href="{% url 'task-submit' %}?id={{task_id}}" class="revoke-btn me-3" style="width: 180px;height: 36px;">Submit to Team Leader</a>
+                    {% if request.session.agentId and is_expired == False or not request.session.agentId %}
+                    <div class="col" style="text-align: right;">
+                        {% if request.session.agentId and customer_list != None %}
+                        <a href="{% url 'task-submit' %}?id={{task_id}}" class="revoke-btn me-3" style="width: 180px;height: 36px;">Submit to Team Leader</a>
+                        {% endif %}
+                        <a href="{% url 'add-customer' %}?id={{task_id}}" style="height: 35px;" class="btn-add btn btn-block btn-primary btn-sm font-weight-medium auth-form-btn">+ ADD NEW</a>
+                    </div>
+                    {% else %}
+                    <div class="col" style="text-align: right;">
+                        <a href="{% url 'delay-task-request' %}?id={{task_id}}" class="revoke-btn me-3" style="width: 200px;height: 36px;">Request To Team Leader</a>
+                    </div>
                     {% endif %}
-                    <a href="{% url 'add-customer' %}?id={{task_id}}" style="height: 35px;" class="btn-add btn btn-block btn-primary btn-sm font-weight-medium auth-form-btn">+ ADD NEW</a>
-                </div>
                 {% else %}
                 <div class="col" style="text-align: right;">
                     <a href="{% url 'task-request' %}?id={{task_id}}" class="revoke-btn me-3" style="width: 200px;height: 36px;">Request To Team Leader</a>
