@@ -249,3 +249,19 @@ class agent_checkin_checkout_tb(models.Model):
 	status=models.CharField(max_length=100,default='')
 	created_at=models.DateTimeField(max_length=100,default='')
 	updated_at=models.DateTimeField(max_length=100,default='')
+
+
+
+class message_tb(models.Model):
+	date=models.DateTimeField(max_length=100,default='')
+	time=models.CharField(max_length=100,default='')
+	admin_id=models.ForeignKey(admin_tb,on_delete=models.CASCADE,default='',null=True)
+	agent_id=models.ForeignKey(agent_tb,on_delete=models.CASCADE,default='',null=True)
+	team_leader_id=models.ForeignKey(team_leader_tb,on_delete=models.CASCADE,default='',null=True)
+	client_id=models.ForeignKey(client_tb,on_delete=models.CASCADE,default='',null=True)
+	message=models.TextField(default='')
+	status=models.CharField(max_length=100,default='')
+	sender=models.CharField(max_length=100,default='')
+	receiver=models.CharField(max_length=100,default='')
+	created_at=models.DateTimeField(max_length=100,default='')
+	updated_at=models.DateTimeField(max_length=100,default='')
