@@ -1,0 +1,79 @@
+{% extends "admin/layouts/app.html" %}
+{% block content %}
+<div class="container-fluid page-body-wrapper">
+    <div class="main-panel">
+      <div class="content-wrapper">
+        <div class="row">
+            <div class="col-12 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <!-- <a href="{% url 'list-task' %}?id={{task_id}}">
+                                <div style = "display : inline-block" class="me-2">
+                                    <i class="fa fa-arrow-left card-title"></i>
+                                </div>
+                            </a> -->
+                            <div style = "display : inline-block">
+                                <h4 class="card-title">Request</h4>
+                            </div>
+                        </div>
+                        <form class="forms-sample" action="{% url 'change-delay-request-status' %}" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="id" value="{{task_id}}">
+                            {% for data in request_data %}
+                            <div class="form-group">
+                                <label for="exampleInputName1">Remark</label>
+                                <textarea  class="form-control" name="remark" rows="4" cols="50" readonly>{{data.remark}}</textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="exampleInputName1">Requested By</label>
+                                <select name="agent_id" class="form-control w-100" readonly>
+                                    {% for x in agent_list %}
+                                    <option value="{{x.id}}" {% if x.id == data.agent_id.id %} selected {% endif %}>{{x.name}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="exampleInputName1">Requested To</label>
+                                <select name="tl_id" class="form-control w-100" readonly>
+                                    {% for x in team_leader_list %}
+                                    <option value="{{x.id}}" {% if x.id == data.team_leader_id.id %} selected {% endif %}>{{x.name}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="exampleInputName1">Requested Date</label>
+                                <input type="date" name="start_date" class="form-control"  value="{{data.created_at|date:'Y-m-d'}}" readonly>
+                            </div>
+                            {% endfor %}
+                            <div class="form-group">
+                                <label for="exampleInputName1">End Date</label>
+                                <input type="date" name="new_end_date" class="form-control"  value="" id="end_date" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="exampleInputName1">End Time</label>
+                                <input type="time" name="time" class="form-control"  value="" id="end_date" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="exampleInputName1">Remark</label>
+                                <textarea  class="form-control" name="status_remark" rows="4" cols="50">{{data.remark}}</textarea>
+                            </div>
+                            <div style="display: inline-block;">
+                                <button type="submit" name="status" value="Approve" class="btn btn-primary btn-submit me-2" id="approve" style="width: 140px;">Approve</button>
+                            </div>
+                            <div style="display: inline-block;">
+                                <button type="submit" name="status" value="Reject" class="revoke-btn reject" style="width: 140px;height: 36px;">Reject</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $( ".reject" ).click(function( event ) {
+        $('#end_date').removeAttr('required');
+    });
+</script>
+{% endblock %}

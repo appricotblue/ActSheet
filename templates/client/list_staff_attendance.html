@@ -1,0 +1,274 @@
+{% extends "admin/layouts/app.html" %}
+{% block content %}
+<style>
+    tr{
+        height: 50px;
+    }
+</style>
+<div class="container-fluid page-body-wrapper">
+    <div class="main-panel">
+        <div class="content-wrapper">
+            <div class="row my-3">
+                <div class="col" style="margin-left: 10px;">
+                    <h4 class="card-title div-title">Attendance</h4>
+                </div>
+                <div class="search-container" style="display: inline-block;">
+                    <form action="{% url 'search-attendance' %}" method="post">
+                        {% csrf_token %}
+                        <input type="text" placeholder="Search.." name="search" value="{{search_key}}" class="form-control search-item" required style="width :240px; width: 240px;margin-top: -30px;margin-left: 115px;height: 35px;">
+                        <button type="submit" class="btn-add btn btn-block btn-primary btn-sm font-weight-medium auth-form-btn search" style="width: 53px; margin-top: -49px; margin-left: 360px; height: 35px;"><i class="fa fa-search"></i></button>
+                    </form>
+                </div>
+                <div class="col" style="text-align: right;">
+                    <button id="export_report" class="revoke-btn">Export</button>
+                </div>
+                <form class="forms-sample" action="{% url 'attendance' %}" method="post">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label for="exampleInputName1">Date From </label>
+                                <input type="date" name="date_from" class="form-control" id="exampleInputName1" value="{{date_from}}" style="height: 33px;" required>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label for="exampleInputName1">Date To</label>
+                                <input type="date" name="date_to" class="form-control" id="exampleInputName1" value="{{date_to}}" style="height: 33px;" required>
+                            </div>
+                        </div>
+                        <div class="col-md-2 select-based-type">
+                            <div class="form-group">
+                                <label for="exampleInputName1">Branch</label>
+                                <select name="branch_id" class="form-control all_branch" style="height: 33px;" required>
+                                    <option value="" disabled selected>Select branch</option>
+                                    {% for x in branch %}
+                                    <option value="{{x.id}}" {% if x.id|slugify == branch_id|slugify %} selected {% endif %}>{{x.name}}</option>
+                                    {% endfor %}
+                                </select>
+                                <p class="card-description error mt-2" style="color: red; display:none">
+                                    Please select branch
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-2 select-based-type">
+                            <div class="form-group">
+                                <label for="exampleInputName1">Staff</label>
+                                <select name="staff_id" class="form-control all_staff" style="height: 33px;" required>
+                                    <option value="" disabled selected>Select staff</option>
+                                    {% for x in staff_list %}
+                                    <option value="{{x.id}}" {% if x.id|slugify == staff_id|slugify %} selected {% endif %}>{{x.name}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <button type="submit" class="btn-add btn btn-block btn-primary btn-sm font-weight-medium auth-form-btn generate-button" {%if request.session.clientId %} style="margin-top: 30px;" {% endif %}>Generate</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            {% for values in staff_attendance_list %} 
+                {% for key,value in values.items %}
+                <div class="row">
+                    <h4 class="card-title">{{key}}</h4>
+                    <div class="col-lg-12 grid-margin stretch-card">
+                        <div class="card">
+                            <div class="card-body">
+                                <div>
+                                {% if messages %}
+                                    {% for message in messages %}
+                                        <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}" role="alert">{{ message }}</div>
+                                    {% endfor %}
+                                {% endif %}
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th>Date</th>
+                                                <th>Name</th>
+                                                <th>Check In</th>
+                                                <th>Check Out</th>
+                                                <th>Official Break Hrs</th>
+                                                <th>Un Official Break Hrs</th>
+                                                <th>Total Break Hrs</th>
+                                                <th>Total Work Hrs</th>
+                                                <th>OT</th>
+                                                <th>UT</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for x in value %}
+                                            <tr>
+                                                <td>
+                                                    {{ x.date|date:"M d Y" }}
+                                                </td>
+                                                <td>
+                                                    {{x.name}}
+                                                </td>
+                                                <td>
+                                                    {{x.in_time}}
+                                                </td>
+                                                <td>
+                                                    {{x.out_time}}
+                                                </td>
+                                                <td>
+                                                    {{ x.official_break }}
+                                                </td>
+                                                <td>
+                                                    {{ x.un_official_break }}
+                                                </td>
+                                                <td>
+                                                    {{ x.break_hours }}
+                                                </td>
+                                                <td>
+                                                    {{ x.work_hours }}
+                                                </td>
+                                                <td>
+                                                    {% if x.over_time != '0'  %}
+                                                    <span class="bullet bullet-dot h-6px w-6px position-absolute " style="padding-bottom: 7px;
+                                                        padding-right: 7px;    
+                                                        color: white; 
+                                                        font-size: 12px;
+                                                        text-align: center;
+                                                        width: 60px;
+                                                        height: 20px;
+                                                        border-radius: 0 !important;
+                                                        background-color: #6565e8;
+                                                        margin-top: -10px;
+                                                        margin-left: -25px;">
+                                                        <p style="font-size: 12px;">{{x.over_time}}</a></p>
+                                                    </span>
+                                                    {% else %}
+                                                    {{x.over_time}}
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if x.under_time != '0'  %}
+                                                    <span class="bullet bullet-dot h-6px w-6px bg-danger position-absolute " style="padding-bottom: 7px;
+                                                        padding-right: 7px;    
+                                                        color: white; 
+                                                        font-size: 12px;
+                                                        text-align: center;
+                                                        width: 60px;
+                                                        height: 20px;
+                                                        border-radius: 0 !important;
+                                                        margin-top: -10px;
+                                                        margin-left: -8px;">
+                                                        <p style="font-size: 12px;">{{x.under_time}}</a></p>
+                                                    </span>
+                                                    {% else %}
+                                                    {{x.under_time}}
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if x.id %}
+                                                    <a href="{% url 'view-attendance' %}?id={{x.id}}">
+                                                        &nbsp;&nbsp;&nbsp;&nbsp;<i class="mdi mdi-eye text-primary text-success me-2"></i>
+                                                    </a>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>       
+                    </div> 
+                </div>
+                {% endfor %}
+            {% endfor %}
+            {% if not staff_attendance_list %}
+            <div style="text-align: center;font-weight: 600;">
+                No Data Found
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+<script>
+    $(document).on('change','.all_branch',function() {
+        var branch_id   = $(this).val();
+
+        $('.error').hide();
+
+        $.ajax({
+            url:"{% url 'get-branch-staff' %}",
+            method:"get",
+            data:{branch_id:branch_id},
+            success:function(data)
+            {  
+                $('.all_staff').empty();
+                $('.all_staff').append(`<option value="" disabled selected>Select staff</option>`);
+                $.each( data['models_to_return'], function( key1, value ) 
+                {
+                    $('.all_staff').append(`<option value="`+value['id']+`">`+value['name']+`</option>`);
+                });
+            }
+        });
+    });
+
+    $(document).on('click','.all_staff',function() {
+        var branch_id   = $('.all_branch').val();
+
+        if(branch_id == null)
+        {
+            $('.error').show();
+        }
+    });
+</script>
+<script>
+    function download_csv(csv, filename) {
+    var csvFile;
+    var downloadLink;
+
+    // CSV FILE
+    csvFile = new Blob([csv], {type: "text/csv"});
+
+    // Download link
+    downloadLink = document.createElement("a");
+
+    // File name
+    downloadLink.download = filename;
+
+    // We have to create a link to the file
+    downloadLink.href = window.URL.createObjectURL(csvFile);
+
+    // Make sure that the link is not displayed
+    downloadLink.style.display = "none";
+
+    // Add the link to your DOM
+    document.body.appendChild(downloadLink);
+
+    // Lanzamos
+    downloadLink.click();
+}
+
+function export_table_to_csv(html, filename) {
+	var csv = [];
+	var rows = document.querySelectorAll("table tr");
+	
+    for (var i = 0; i < rows.length; i++) {
+		var row = [], cols = rows[i].querySelectorAll("td, th");
+		
+        for (var j = 0; j < cols.length; j++) 
+            row.push(cols[j].innerText);
+        
+		csv.push(row.join(","));		
+	}
+
+    // Download CSV
+    download_csv(csv.join("\n"), filename);
+}
+
+document.querySelector("#export_report").addEventListener("click", function () {
+    var html = document.querySelector("table").outerHTML;
+	export_table_to_csv(html, "attendance.csv");
+});
+</script>
+{% endblock %}

@@ -1,0 +1,84 @@
+{% extends "admin/layouts/app.html" %}
+{% block content %}
+<div class="container-fluid page-body-wrapper">
+    <div class="main-panel">
+      <div class="content-wrapper">
+        <div class="row">
+            <div class="col-12 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <a href="{% url 'list-jobs' %}">
+                                <div style = "display : inline-block" class="me-2">
+                                    <i class="fa fa-arrow-left card-title"></i>
+                                </div>
+                            </a>
+                            <div style = "display : inline-block">
+                                <h4 class="card-title">View Job Details</h4>
+                            </div>
+                        </div>
+                        {% for job in job_data %}
+                        <form class="forms-sample" action="{% url 'edit-job' %}?id={{job.id}}" method="post">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label for="exampleInputName1">Title</label>
+                                <input type="text" name="title" class="form-control" id="exampleInputName1" placeholder="Title" value="{{job.title}}" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="exampleInputName1">Description</label>
+                                <textarea  class="form-control" name="description" rows="4" cols="50" readonly>{{job.description}}</textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="exampleInputName1">Client</label>
+                                <select name="client_id" class="form-control" id="exampleInputName1" disabled>
+                                    <option value="" selected disabled>Select client</option>
+                                    {% for x in client_list %}
+                                    <option value="{{x.id}}" {% if x.id == job.client_id.id %} selected="selected" {% endif %}>{{x.name}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            {% if not request.session.teamLeadertId %}
+                            <div class="form-group">
+                                <label for="exampleInputName1">Team Leader</label>
+                                <select name="team_leader_id" class="form-control" id="exampleInputName1" disabled>
+                                    <option value="" selected disabled>Select team leader</option>
+                                    {% for x in team_leader_list %}
+                                    <option value="{{x.id}}" {% if x.id == job.team_leader_id.id %} selected="selected" {% endif %}>{{x.name}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            {% endif %}
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">Start Date</label>
+                                        <input type="date" name="start_date" class="form-control"  value="{{job.start_date|date:'Y-m-d'}}" readonly>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">Actual Start Date</label>
+                                        <input type="date" name="actual_start_date" class="form-control" id="exampleInputName1"  value="{{job.actual_start_date|date:'Y-m-d'}}" readonly>
+                                    </div>
+                                    
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">End Date</label>
+                                        <input type="date" name="end_date" class="form-control" id="exampleInputName1" value="{{job.end_date|date:'Y-m-d'}}" readonly>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">Actual End Date</label>
+                                        <input type="date" name="actual_end_date" class="form-control" id="exampleInputName1"  value="{{job.actual_end_date|date:'Y-m-d'}}" readonly>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

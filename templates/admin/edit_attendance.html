@@ -1,0 +1,934 @@
+{% extends "admin/layouts/app.html" %}
+{% block content %}
+<div class="container-fluid page-body-wrapper">
+    <div class="main-panel">
+      <div class="content-wrapper">
+        <div class="row">
+            <div class="col-12 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        {% for attendance in attendace_data %}
+                        <div class="mb-4">
+                            {% if not request.session.clientId %}
+                            <a href="{% url 'list-attendance' %}">
+                                <div style = "display : inline-block" class="me-2">
+                                    <i class="fa fa-arrow-left card-title"></i>
+                                </div>
+                            </a>
+                            {% else %}
+                            <a href="{% url 'attendance' %}">
+                                <div style = "display : inline-block" class="me-2">
+                                    <i class="fa fa-arrow-left card-title"></i>
+                                </div>
+                            </a>
+                            {% endif %}
+                            <div style = "display : inline-block">
+                                <h4 class="card-title">Edit Attendance</h4>
+                            </div>
+                            {% if not request.session.agentId %}
+                            {% if attendance.approve == False%}
+                            <div style="text-align: right; margin-top: -44px;">
+                                <a href="{% url 'approve-staff-attendance' %}?id={{attendance.id}}" class="revoke-btn"><i class="fa fa-check"></i>&nbsp; Approve</a>
+                            </div>
+                            {% endif %}
+                            {% endif %}
+                        </div>
+                        <form class="forms-sample" action="{% url 'edit-attendance' %}" method="post" id="addForm" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <input type="hidden" name="staff_attendace_id" value="{{attendance.id}}">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">Staff</label>
+                                        <select name="staff_id" class="form-control form-field" id="staff" style="height: 47px;" required>
+                                            <option selected disabled>Select staff</option>
+                                            {% for x in staff_list %}
+                                            <option value="{{x.id}}" {% if x.id == attendance.staff_id.id %} selected {% endif %}>{{x.name}}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <p class="card-description stafferror" style="color: red; display:none">
+                                            Please select staff
+                                        </p>
+                                        <input type="hidden" id="staff_total_work_hour" name="staff_total_work_hour" value="{{staff_total_work_hour}}">
+                                        <input type="hidden" id="staff_required_work_hour" name="staff_required_work_hour" value="{{staff_required_work_hour}}">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">In Date</label>
+                                        <input type="date" name="date" class="form-control form-field" id="date"  value="{{attendance.date|date:'Y-m-d'}}" required>
+                                        <p class="card-description error" style="color: red; display:none">
+                                            Please select date
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">In</label>
+                                        <input type="time" name="in_time" class="form-control form-field work_time" id="work_in_time" value="{{attendance.in_time}}">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">Out Date</label>
+                                        <input type="date" name="out_date" class="form-control form-field work_time" min="{{attendance.date|date:'Y-m-d'}}" id="out_date" value="{{attendance.out_date}}">
+                                        <p class="card-description out_date_error" style="color: red; display:none">
+                                            Please select date
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">Out</label>
+                                        <input type="time" name="out_time" class="form-control form-field work_time" id="work_out_time" value="{{attendance.out_time}}">
+                                        <p class="card-description out_time_error" style="color: red; display:none">
+                                            Out time must be greater than in time
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="card-description break_error" style="color: red; display:none;">
+                                Can't add, you already add this time range
+                            </p>
+                            <p class="card-description work_break_error" style="color: red; display:none;">
+                                Can't add, wrong time interval
+                            </p>
+                            <div class="mt-3">
+                                <h4 class="card-title" style="font-size: 16px;">Short Breaks</h4>
+                            </div>
+                            <div class="row">
+                            {% if actual_break == 0 %}
+                                <div class="col-md-2 1">
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">Out Date</label>
+                                        <input type="date" name="short_break[1][out_date]" id="out_date1" data-id="1" class="form-control short_break break_date form-field" min="{{attendance.date|date:'Y-m-d'}}" max="{{attendance.out_date}}" style="height:41px;">
+                                        <p class="card-description out_date1_error" style="color: red; display:none">
+                                            Please select date
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 1">
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">Out</label>
+                                        <input type="time" name="short_break[1][out_time]" id="out_time1" data-id="1" class="form-control short_break form-field" style="height:41px;">
+                                    </div>
+                                </div>
+                                <div class="col-md-2 1">
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">In Date</label>
+                                        <input type="date" name="short_break[1][in_date]" id="in_date1" data-id="1" class="form-control short_break break_date form-field" min="{{attendance.date|date:'Y-m-d'}}" max="{{attendance.out_date}}" style="height:41px;">
+                                        <p class="card-description in_date1_error" style="color: red; display:none">
+                                            Please select date
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 1">
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">In</label>
+                                        <input type="time" name="short_break[1][in_time]"  id="in_time1" data-id="1" class="form-control short_break form-field" style="height:41px;">
+                                        <p class="card-description" id="break_out_time_error1" style="color: red; display: none;">
+                                            Break in time must be greater than break out time
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-1 1">
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">Type</label>
+                                        <select name="short_break[1][type]" class="form-control category" style="height: 41px;">
+                                            <option value="Un Official">Un Official</option>
+                                            <option value="Official">Official</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 1">
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">Remark</label>
+                                        <input type="text" name="short_break[1][remark]" style="height: 41px;" class="form-control">
+                                    </div>
+                                </div>
+                                <input type="hidden" class="break_diff 1" id="break_diff1" name="short_break[1][break_diff]">
+                            {% else %}
+                            {% for break_hours in attendace_break %}
+                                <input type="hidden" name="short_break[{{break_hours.key}}][break_id]" value="{{break_hours.id}}">
+                                <div class="col-md-2 {{break_hours.key}}">
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">Out Date</label>
+                                        <input type="date" name="short_break[{{break_hours.key}}][out_date]" id="out_date{{break_hours.key}}" data-id="{{break_hours.key}}" class="form-control short_break break_date form-field" value="{{break_hours.out_date}}" min="{{attendance.date|date:'Y-m-d'}}" max="{{attendance.out_date}}"  style="height:41px;">
+                                        <p class="card-description out_date{{break_hours.key}}_error" style="color: red; display:none">
+                                            Please select date
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 {{break_hours.key}}">
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">Out</label>
+                                        <input type="time" name="short_break[{{break_hours.key}}][out_time]" id="out_time{{break_hours.key}}" data-id="{{break_hours.key}}" class="form-control short_break form-field" style="height:41px;" value="{{break_hours.out_time}}">
+                                    </div>
+                                </div>
+                                <div class="col-md-2 {{break_hours.key}}">
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">In Date</label>
+                                        <input type="date" name="short_break[{{break_hours.key}}][in_date]" id="in_date{{break_hours.key}}" data-id="{{break_hours.key}}" class="form-control short_break break_date form-field" value="{{break_hours.in_date}}" min="{{attendance.date|date:'Y-m-d'}}" max="{{attendance.out_date}}" style="height:41px;">
+                                        <p class="card-description in_date{{break_hours.key}}_error" style="color: red; display:none">
+                                            Please select date
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 {{break_hours.key}}">
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">In</label>
+                                        <input type="time" name="short_break[{{break_hours.key}}][in_time]"  id="in_time{{break_hours.key}}" data-id="{{break_hours.key}}" class="form-control short_break form-field" style="height:41px;" value="{{break_hours.in_time}}">
+                                        <p class="card-description" id="break_out_time_error{{break_hours.key}}" style="color: red; display: none;">
+                                            Break in time must be greater than break out time
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-1 {{break_hours.key}}">
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">Type</label>
+                                        <select name="short_break[{{break_hours.key}}][type]" class="form-control category" style="height: 41px;">
+                                            <option value="Official" {% if 'Official' == break_hours.break_type%} selected {% endif %}>Official</option>
+                                            <option value="Un Official" {% if 'Un Official' == break_hours.break_type%} selected {% endif %}>Un Official</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 {{break_hours.key}}">
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">Remark</label>
+                                        <input type="text" name="short_break[{{break_hours.key}}][remark]" style="height: 41px;" class="form-control" value="{{break_hours.remark}}">
+                                    </div>
+                                </div>
+                                <input type="hidden" class="break_diff {{break_hours.key}}" id="break_diff{{break_hours.key}}" name="short_break[{{break_hours.key}}][break_diff]" value="{{break_hours.break_diff}}">
+                                
+                                <div class="col-md-1 new {{break_hours.key}} area_ofexpertise">
+                                    <div class="form-group div-area">
+                                        <a style="margin-top: 31px; width: 43px; margin-left: -27px;" class="revoke-btn remove" id="{{break_hours.key}}"><i class="fa fa-close" style="margin-left: -3px;"></i></a>
+                                        {% if break_hours.remove == False %}
+                                        <a style="margin-top: 31px; width: 43px;" class="add-btn-att add "><i class="fa fa-plus" style="margin-left: -3px;"></i></a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                            {% endif %}
+                            </div>
+                            <div class="row">
+                                <input type="hidden" name="" class="div-num" id="div-num" value="{{count_break}}">
+                                <input type="hidden" name="break_num" class="div-number" id="div-number" value="{{count_break}}">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">Break Hours</label>
+                                        <input type="text" class="form-control break_hours" id="exampleInputName1" value="{{attendance.break_hours}}" readonly>
+                                        <input type="hidden" name="break_hours" class="break_hours" value="{{attendance.break_hours}}">
+                                        <input type="hidden" name="epoch_break_hours" id="epoch_break_hours" value="{{attendance.epoch_break_hours}}">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">Work Hours</label>
+                                        <input type="text" name="" class="form-control work_hours" id="exampleInputName1" value="{{attendance.work_hours}}" readonly>
+                                        <input type="hidden" name="work_hours" class="work_hours" value="{{attendance.work_hours}}">
+                                        <input type="hidden" name="epoch_work_hours" id="epoch_work_hours" value="{{attendance.epoch_work_hours}}">
+                                        <input type="hidden" name="epoch_org_work_hours" id="epoch_org_work_hours" value="{{attendance.epoch_org_work_hours}}">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">Over Time</label>
+                                        <input type="text" class="form-control staff_over_time" id="over_time" value="{{attendance.over_time}}" readonly>
+                                        <input type="hidden" name="over_time" class="staff_over_time" value="{{attendance.over_time}}">
+                                        <input type="hidden" name="epoch_over_time" id="epoch_over_time" value="{{attendance.epoch_over_time}}">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">Under Time</label>
+                                        <input type="text" class="form-control staff_under_time" id="exampleInputName1" value="{{attendance.under_time}}" readonly>
+                                        <input type="hidden" name="under_time" class="staff_under_time" value="{{attendance.under_time}}">
+                                        <input type="hidden" name="epoch_under_time" id="epoch_under_time" value="{{attendance.epoch_under_time}}">
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="card-description formerror" style="color: red; display: none;">
+                                Please fill out all required fields.
+                            </p>
+                            <div style="display: inline-block;">
+                                <button type="submit" name="button" value="draft" class="revoke-btn me-2"  style="width: 140px;">Save as Draft</button>
+                            </div>
+                            <div style="display: inline-block;">
+                                <button type="submit" name="button" value="submit" class="btn btn-primary btn-submit" style="width: 175px;height: 39px;">Submit</button>
+                            </div>
+                        </form>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).on('click', '.add', function(event){
+        var div_num             = $('#div-num').val()
+        var i                   = parseInt(div_num) + parseInt(1);
+        $('#div-num').val(i);
+        
+
+        var defore_div          = $('#div-number').val()
+        div_number              = parseInt(defore_div) + parseInt(1);
+        $('#div-number').val(div_number)
+        
+        
+        $('.area_ofexpertise:last').before(
+                                `
+                                <div class="col-md-1 new `+div_num+` area_ofexpertise">
+                                    <div class="form-group div-area">
+                                        <a style="margin-top: 31px; width: 43px; margin-left: -27px;" class="revoke-btn remove" id="`+div_num+`"><i class="fa fa-close" style="margin-left: -3px;"></i></a>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 `+i+`">
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">Out Date</label>
+                                        <input type="date" name="short_break[`+i+`][out_date]" id="out_date`+i+`" data-id="`+i+`" class="form-control break_out_date short_break break_date form-field" style="height:41px;">
+                                        <p class="card-description out_date`+i+`_error" style="color: red; display:none">
+                                            Please select date
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 `+i+`">
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">Out</label>
+                                        <input type="time" name="short_break[`+i+`][out_time]" id="out_time`+i+`" data-id="`+i+`"  class="form-control short_break form-field" style="height:41px;">
+                                    </div>
+                                </div>
+                                <div class="col-md-2 `+i+`">
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">In Date</label>
+                                        <input type="date" name="short_break[`+i+`][in_date]" id="in_date`+i+`" data-id="`+i+`" class="form-control break_in_date short_break break_date form-field" style="height:41px;">
+                                        <p class="card-description in_date`+i+`_error" style="color: red; display:none">
+                                            Please select date
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 `+i+`">
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">In</label>
+                                        <input type="time" name="short_break[`+i+`][in_time]" id="in_time`+i+`" data-id="`+i+`"  class="form-control short_break form-field" style="height:41px;">
+                                        <p class="card-description" id="break_out_time_error`+i+`" style="color: red; display: none;">
+                                            Break in time must be greater than break out time
+                                        </p>
+                                    </div>
+                                </div>
+                                <input type="hidden" class="break_diff `+i+`" id="break_diff`+i+`" name="short_break[`+i+`][break_diff]">
+                                <div class="col-md-1 `+i+`">
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">Type</label>
+                                        <select name="short_break[`+i+`][type]" class="form-control category" id="" style="height: 41px;">
+                                            <option value="Un Official">Un Official</option>
+                                            <option value="Official">Official</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 `+i+`">
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">Remark</label>
+                                        <input type="text" name="short_break[`+i+`][remark]" style="height: 41px;" class="form-control">
+                                    </div>
+                                </div>
+                            `);
+
+        $('.area_ofexpertise:last').empty();
+        
+        
+        $('.area_ofexpertise:last').append(
+                                `<div class="form-group div-area `+i+`">
+                                    <a style="margin-top: 31px; width: 43px; margin-left: -27px;" class="revoke-btn remove remove-first"  id="`+i+`"><i class="fa fa-close" style="margin-left: -3px;"></i></a>
+                                    <a style="margin-top: 31px; width: 43px;" class="add-btn-att add add-remove"><i class="fa fa-plus" style="margin-left: -3px;"></i></a>
+                                </div>`);
+
+        $('.'+i).closest('.area_ofexpertise').removeClass("  "+div_num);
+        $('.'+i).closest('.area_ofexpertise').addClass("  "+i);
+
+        $('#div-num').val(i);
+
+
+        $('.break_date').attr({  
+            "min" : $('#date').val(),
+            "max" : $('#out_date').val()
+        });
+        
+    });
+    $(document).on('click', '.remove', function(event){
+        var bef_number  = $('#div-number').val()
+        div_number      = parseInt(bef_number) - parseInt(1);
+        $('#div-number').val(div_number);
+
+
+        var div_num     = $('#div-num').val()
+        var i           = parseInt(div_num) - parseInt(1);
+        $('#div-num').val(i);
+
+        
+        var class_name  = $(this).attr('id');
+
+
+        $('.'+class_name).remove();
+        
+        $('.add-remove').remove();
+        $('.div-area:last').append(`<a style="margin-top: 31px; width: 43px;" class="add-btn-att add add-remove"><i class="fa fa-plus" style="margin-left: -3px;"></i></a>`);
+        
+        
+
+        if(div_number == 1)
+        {
+            $('.remove').remove();
+        }
+        //-------------- calculate break hours--------
+        var sum = 0;
+        $('.break_diff').each(function(){
+            if(this.value.length != 0)
+            {
+                sum += parseFloat(this.value);
+            }
+        });
+
+        var break_hours     = convert(sum);
+        
+        $('.break_hours').val(break_hours);
+        $('#epoch_break_hours').val(sum);
+        //-------------- calculate break hours--------
+            
+        var epoch_work_hours        = $('#epoch_org_work_hours').val();
+        var total_work_hours_epoch  = epoch_work_hours - sum;
+
+        var work_hours  = convert(total_work_hours_epoch);
+        
+        $('.work_hours').val(work_hours);
+        $('#epoch_work_hours').val(total_work_hours_epoch);
+
+        var epoch_over_time   = $('#epoch_work_hours').val() - $('#staff_total_work_hour').val();
+
+        if(epoch_over_time > 0)
+        {
+            var over_time  = convert(epoch_over_time);
+            $('.staff_over_time').val(over_time)
+            $('#epoch_over_time').val(epoch_over_time)
+
+        }
+        else
+        {
+            $('.staff_over_time').val(0)
+            $('#epoch_over_time').val(0)
+        }
+
+        var epoch_under_time =  $('#staff_required_work_hour').val() - $('#epoch_work_hours').val();
+        
+        if(epoch_under_time > 0)
+        {
+            var under_time  = convert(epoch_under_time);
+            $('.staff_under_time').val(under_time)
+            $('#epoch_under_time').val(epoch_under_time)
+
+        }
+        else
+        {
+            $('.staff_under_time').val(0)
+            $('#epoch_under_time').val(0)
+        }
+    });
+</script>
+<script>
+    $(document).on('change','.short_break', function() {
+
+        console.log('short break');
+
+        var time_id     = $(this).attr('id');
+        var data_id     = $(this).attr('data-id');
+
+        var out_date    = $('#out_date'+data_id).val();
+        var in_date     = $('#in_date'+data_id).val();
+        
+        var out_time    = $('#out_time'+data_id).val();
+        var in_time     = $('#in_time'+data_id).val();
+
+        var work_out_time       = $('#work_out_time').val();
+        var work_in_time        = $('#work_in_time').val();
+
+        var staff_id    = $('#staff').val();
+
+        if(staff_id == null)
+        {
+            $('.stafferror').show();
+            $("html, body").animate({ scrollTop: 0 }, "slow");
+            return;
+        }
+
+        
+        if(out_date.length == 0)
+        {
+            $('.out_date'+data_id+'_error').show();
+            $('.out_date'+data_id+'_error').fadeTo(8000, 1000).slideUp(900, function(){
+                $('.out_date'+data_id+'_error').slideUp(900);
+            });
+            $('#out_time'+data_id).val('');
+            return;
+        }
+
+        // -----------------------------------------------------------------------------------------
+
+        var div_number          = $('#div-number').val();
+        var date_selected       = new Date($('#out_date'+data_id).val());
+        var id_selected         = $(this).attr('data-id');
+        var out_time_selected   = $('#out_time'+id_selected).val();
+        // var in_time_selected    = $('#in_time'+id_selected).val();
+        var short_break_error   = false;
+        
+        if(div_number != 1)
+        {
+            if(out_time_selected.length != 0)
+            {
+                $('.short_break').each(function(){
+                    var get_id  = $(this).attr('data-id');
+            
+                    if(get_id != id_selected)
+                    {
+                        var get_out_date    = new Date($('#out_date'+get_id).val());
+                        var get_out_time    = $('#out_time'+get_id).val()
+                        var get_in_time     = $('#in_time'+get_id).val()
+
+                        if (get_out_date.toDateString() === date_selected.toDateString()) 
+                        {
+                            if (out_time_selected >= get_out_time && out_time_selected <= get_in_time) 
+                            {
+                                //in between these two times
+                                $('.break_error').show();
+                                $('#out_time'+id_selected).val('');
+                                $("html, body").animate({ scrollTop: 0 }, "slow");
+                                short_break_error   = true;
+                                return;
+                            }
+                            
+                        } 
+                    }
+                    
+                });
+            }
+            
+        }
+
+        if(out_time_selected.length != 0)
+        {
+            if(!(out_time_selected >= work_in_time && out_time_selected <= work_out_time))
+            {
+                //in between these two times
+                $('.work_break_error').show();
+                $('#out_time'+id_selected).val('');
+                $("html, body").animate({ scrollTop: 0 }, "slow");
+                short_break_error   = true;
+                return;
+            }
+        }
+
+        // ----------------------------------------------------
+
+
+        if(in_time.length != 0 && out_time.length != 0)
+        {  
+            $('#break_diff'+data_id).empty();
+
+            if(in_time != null)
+            {
+                if(in_date.length == 0)
+                {
+                    $('.in_date'+data_id+'_error').show();
+                    $('.in_date'+data_id+'_error').fadeTo(8000, 1000).slideUp(900, function(){
+                        $('.in_date'+data_id+'_error').slideUp(900);
+                    });
+                    $('#in_time'+data_id).val('');
+                    return;
+                }
+
+                if(in_date == out_date)
+                {
+                    if(in_time < out_time)
+                    {
+                        $('#break_out_time_error'+data_id).show();
+                        $('#in_time'+data_id).val('');
+                        $("#break_out_time_error"+data_id).fadeTo(8000, 1000).slideUp(900, function(){
+                            $("#break_out_time_error"+data_id).slideUp(900);
+                        });
+                        return;
+                    }
+                }
+
+                // var dwell_time  = (new Date(in_date+" " + in_time) - new Date(out_date+" "+ out_time) ) /1000/60;
+                
+                // var hour        = parseInt(dwell_time/60);
+                // var min         = dwell_time%60;
+
+                // if(min<10){
+                //     min         = "0" + min;
+                // }
+                // var time        = (hour + ":" + min);
+
+                var start_actual_time   =  in_date+" " +in_time;
+                var end_actual_time     =  out_date+" " +out_time;
+
+
+                start_actual_time       = new Date(start_actual_time);
+                end_actual_time         = new Date(end_actual_time);
+
+                var diff                = start_actual_time - end_actual_time;
+
+                var diffSeconds         = diff/1000;
+                var HH                  = Math.floor(diffSeconds/3600);
+                var MM                  = Math.floor(diffSeconds%3600)/60;
+
+                var hour        = HH;
+                var min         = MM;
+
+                
+                var dwell_time  = ((HH < 10)?("0" + HH):HH) + ":" + ((MM < 10)?("0" + MM):MM);
+
+                var time        = dwell_time;
+
+                var timeParts   = time.split(":");
+
+                var epoch       = ((+timeParts[0] * (60000 * 60)) + (+timeParts[1] * 60000));
+
+                $('#break_diff'+data_id).val(epoch);
+                
+                //-------------- calculate break hours--------
+                var sum = 0;
+                $('.break_diff').each(function(){
+                    sum += parseFloat(this.value);
+                });
+                
+                var break_hours     = convert(sum);
+                
+                $('.break_hours').val(break_hours);
+                $('#epoch_break_hours').val(sum);
+                //-------------- calculate break hours--------
+                 
+                var epoch_work_hours        = $('#epoch_org_work_hours').val();
+                var total_work_hours_epoch  = epoch_work_hours - sum;
+
+                var work_hours  = convert(total_work_hours_epoch);
+                
+                $('.work_hours').val(work_hours);
+                $('#epoch_work_hours').val(total_work_hours_epoch);
+
+
+                var epoch_over_time   = $('#epoch_work_hours').val() - $('#staff_total_work_hour').val();
+                
+                if(epoch_over_time > 0)
+                {
+                    var over_time  = convert(epoch_over_time);
+                   
+                    $('.staff_over_time').val(over_time)
+                    $('#epoch_over_time').val(epoch_over_time)
+                    
+                }
+                else
+                {
+                    $('.staff_over_time').val(0)
+                    $('#epoch_over_time').val(0)
+                }
+
+                var epoch_under_time =  $('#staff_required_work_hour').val() - $('#epoch_work_hours').val();
+             
+                if(epoch_under_time > 0)
+                {
+                    var under_time  = convert(epoch_under_time);
+                    $('.staff_under_time').val(under_time)
+                    $('#epoch_under_time').val(epoch_under_time)
+
+                }
+                else
+                {
+                    $('.staff_under_time').val(0)
+                    $('#epoch_under_time').val(0)
+                }
+
+            }
+        }
+    });
+
+    function convert(t) {
+
+        var diffSeconds = t/1000;
+        var HH          = Math.floor(diffSeconds/3600);
+        var MM          = Math.floor(diffSeconds%3600)/60;
+
+        var time        = ((HH < 10)?("0" + HH):HH) + ":" + ((MM < 10)?("0" + MM):MM);
+       
+        return time;
+    }
+
+    $('#date').change(function () {
+
+        $('.break_date').attr({  
+            "min" : $(this).val(),
+            "max" : $('#out_date').val()
+        });
+
+        $('#out_date').attr({ 
+            "min" : $(this).val(),
+        }); 
+
+        var staff_id            = $('#staff').val();
+
+        if(staff_id == null)
+        {
+            $('.stafferror').show();
+            $("html, body").animate({ scrollTop: 0 }, "slow");
+
+            return;
+        }
+        $('.error').hide();
+    });
+
+    $('#out_date').change(function () {
+        $('.break_date').attr({  
+            "min" : $('#date').val(),
+            "max" : $(this).val(),
+        });
+    });
+
+</script>
+
+<script>
+    $(document).on('change','.work_time', function() {
+        var date                = $('#date').val();
+        var out_date            = $('#out_date').val();
+
+        var work_out_time       = $('#work_out_time').val();
+        var work_in_time        = $('#work_in_time').val();
+        var epoch_break_hours   = $('#epoch_break_hours').val();
+
+        var staff_id            = $('#staff').val();
+
+        if(staff_id == null)
+        {
+            $('.stafferror').show();
+            $("html, body").animate({ scrollTop: 0 }, "slow");
+            return;
+        }
+
+        if(date.length == 0)
+        {
+            $('.error').show();
+            $("html, body").animate({ scrollTop: 0 }, "slow");
+            $(".error").fadeTo(8000, 1000).slideUp(900, function(){
+                $(".error").slideUp(900);
+            });
+            return;
+        }
+
+
+        if(work_in_time.length != 0 && work_out_time.length != 0)
+        {  
+            $('.work_hours').empty();
+
+            if(work_out_time != null)
+            {
+                if(out_date.length == 0)
+                {
+                    $('.out_date_error').show();
+                    $("html, body").animate({ scrollTop: 0 }, "slow");
+                    $(".out_date_error").fadeTo(8000, 1000).slideUp(900, function(){
+                        $(".out_date_error").slideUp(900);
+                    });
+                    return;
+                }
+                if(out_date == date)
+                {
+                    if(work_out_time < work_in_time)
+                    {
+                        $('.out_time_error').show();
+                        $('#work_out_time').val('');
+                        $(".out_time_error").fadeTo(8000, 1000).slideUp(900, function(){
+                            $(".out_time_error").slideUp(900);
+                        });
+                        return;
+                    }
+                }
+
+                // var dwell_time  = (new Date(out_date+" " + work_out_time) - new Date(date+" "+ work_in_time) ) /1000/60;
+
+                // var hour        = parseInt(dwell_time/60);
+                // var min         = dwell_time%60;
+                // if(min<10){
+                //     min         = "0" + min;
+                // }
+                // var time        = (hour + ":" + min);
+
+                var start_actual_time  =  date+" " +work_in_time;
+                var end_actual_time    =  out_date+" " +work_out_time;
+
+                start_actual_time = new Date(start_actual_time);
+                end_actual_time = new Date(end_actual_time);
+
+                var diff = end_actual_time - start_actual_time;
+
+                var diffSeconds = diff/1000;
+                var HH = Math.floor(diffSeconds/3600);
+                var MM = Math.floor(diffSeconds%3600)/60;
+
+                var hour        = HH;
+                var min         = MM;
+
+                var dwell_time = ((HH < 10)?("0" + HH):HH) + ":" + ((MM < 10)?("0" + MM):MM);
+
+                var time        = dwell_time;
+
+                var timeParts   = time.split(":");
+
+                var epoch_work  = ((+timeParts[0] * (60000 * 60)) + (+timeParts[1] * 60000));
+
+                var total_work_hours_epoch  = epoch_work - epoch_break_hours;
+
+                var work_hours  = convert(total_work_hours_epoch);
+
+                $('.work_hours').val(work_hours);
+                $('#epoch_org_work_hours').val(epoch_work);
+                $('#epoch_work_hours').val(total_work_hours_epoch);
+
+                var epoch_over_time   = $('#epoch_work_hours').val() - $('#staff_total_work_hour').val();
+
+                if(epoch_over_time > 0)
+                {
+                    var over_time  = convert(epoch_over_time);
+                    $('.staff_over_time').val(over_time)
+                    $('#epoch_over_time').val(epoch_over_time)
+
+                }
+                else
+                {
+                    $('.staff_over_time').val(0)
+                    $('#epoch_over_time').val(0)
+                }
+
+                var epoch_under_time =  $('#staff_required_work_hour').val() - $('#epoch_work_hours').val();
+             
+                if(epoch_under_time > 0)
+                {
+                    var under_time  = convert(epoch_under_time);
+                    $('.staff_under_time').val(under_time)
+                    $('#epoch_under_time').val(epoch_under_time)
+
+                }
+                else
+                {
+                    $('.staff_under_time').val(0)
+                    $('#epoch_under_time').val(0)
+                }
+            }
+
+            //-------------- calculate break hours--------
+            var sum = 0;
+            $('.break_diff').each(function(){
+                if(this.value.length != 0)
+                {
+                    sum += parseFloat(this.value);
+                }
+            });
+            if(sum != 0){
+
+                var break_hours     = convert(sum);
+                
+                $('.break_hours').val(break_hours);
+                $('#epoch_break_hours').val(sum);
+            
+                //-------------- calculate work hours--------
+                    
+                var epoch_work_hours        = $('#epoch_org_work_hours').val();
+                var total_work_hours_epoch  = epoch_work_hours - sum;
+
+                var work_hours  = convert(total_work_hours_epoch);
+                
+                $('.work_hours').val(work_hours);
+                $('#epoch_work_hours').val(total_work_hours_epoch);
+
+                var epoch_over_time   = $('#epoch_work_hours').val() - $('#staff_total_work_hour').val();
+
+                
+                if(epoch_over_time > 0)
+                {
+                    var over_time  = convert(epoch_over_time);
+                    
+                    $('.staff_over_time').val(over_time)
+                    $('#epoch_over_time').val(epoch_over_time)
+
+                }
+                else
+                {
+                    $('.staff_over_time').val(0)
+                    $('#epoch_over_time').val(0)
+                }
+
+                var epoch_under_time =  $('#staff_required_work_hour').val() - $('#epoch_work_hours').val();
+                
+                if(epoch_under_time > 0)
+                {
+                    var under_time  = convert(epoch_under_time);
+                    $('.staff_under_time').val(under_time)
+                    $('#epoch_under_time').val(epoch_under_time)
+
+                }
+                else
+                {
+                    $('.staff_under_time').val(0)
+                    $('#epoch_under_time').val(0)
+                }
+            }
+        }
+    });
+</script>
+
+<script>
+    $(document).on('change','#staff', function() {
+        $('.stafferror').hide();
+        var staff_id    = $(this).val();
+
+        $.ajax({
+            url:"{% url 'staff-data' %}",
+            method:"get",
+            data:{staff_id:staff_id},
+            success:function(data)
+            {  
+               var staff_total_work_hour    = data[0]['total_work_hour'];
+               var staff_required_work_hour = data[0]['required_hours'];
+
+               var epoch_staff_total_work_hour      = ((+staff_total_work_hour * (60000 * 60)) + (+00 * 60000));
+               var epoch_staff_required_work_hour   = ((+staff_required_work_hour * (60000 * 60)) + (+00 * 60000));
+
+               $('#staff_total_work_hour').val(epoch_staff_total_work_hour)
+               $('#staff_required_work_hour').val(epoch_staff_required_work_hour)
+            }
+        });
+    });
+</script>
+<script>
+    $(document).ready(function() {
+        $('.btn-submit').on('click', function(e){
+            var isValid = true;
+            $('.form-field').each(function() {
+                if ($(this).val() == '' ){
+                    if ($(this).val().length == 0 )
+                    {
+                        isValid = false;
+                        $(".formerror").show();
+                        // $("html, body").animate({ scrollTop: 0 }, "speed");
+                        $(".formerror").fadeTo(8000, 1000).slideUp(900, function(){
+                            $(".formerror").slideUp(900);
+                        });
+                        e.preventDefault();
+                    }
+                }
+                    
+            });
+            return isValid;
+        });
+    });
+</script>
+{% endblock %}

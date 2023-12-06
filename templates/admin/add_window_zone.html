@@ -1,0 +1,114 @@
+{% extends "admin/layouts/app.html" %}
+{% block content %}
+<style>
+    @media (max-width:480px){
+        .remove{
+            margin-left: 85% !important;
+        }
+    }
+</style>
+<div class="container-fluid page-body-wrapper">
+    <div class="main-panel">
+      <div class="content-wrapper">
+        <div class="row">
+            <div class="col-12 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <a href="{% url 'list-window-zones' %}">
+                                <div style = "display : inline-block" class="me-2">
+                                    <i class="fa fa-arrow-left card-title"></i>
+                                </div>
+                            </a>
+                            <div style = "display : inline-block">
+                                <h4 class="card-title">Add Window Zone</h4>
+                            </div>
+                        </div>
+                        <form class="forms-sample" action="{% url 'add-window-zone' %}" method="post">
+                            {% csrf_token %}
+                            <div class="new">
+                                <div class="area_ofexpertise ">
+                                    <div class="area_ofexpertise ">
+                                        <div class="form-group">
+                                            <label for="exampleInputName1">Zone</label>
+                                            <input type="text" name="zone[]" class="form-control" id="exampleInputName1" placeholder="Zone" required>
+                                        </div>
+                                        <a style="width: 43px; margin-left: 96%;display: none;" class="revoke-btn remove remove-first" id="first-remove" ><i class="fa fa-close" style="margin-left: -3px;"></i></a>
+                                    </div>
+                                    <div class="mb-10 fv-row fv-plugins-icon-container arabic_txt" style="border-top: 1px solid #e4e6ef;"></div>
+                                    <input type="hidden" name="number_of_input" value="0" id="number_of_input">
+                                    <div class="area_ofexpertise add_block previous btn btn-sm btn-flex btn-light btn-active-primary fw-bolder  btn_primary mt-3 mb-3">
+                                        <span class="add "><i class="fa fa-plus-circle "></i>&nbsp;&nbsp;Add</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-10">
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">Branch</label>
+                                        <select name="branch_id[]" class="form-control js-select2 select_type" multiple="multiple" id="js-select" required>
+                                            {% for x in branch_list %}
+                                            <option value="{{x.id}}">{{x.name}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <p class="card-description formsuccess" style="color: green; display: none;">
+                                        Successfully selected, Please submit your changes
+                                    </p>
+                                </div>
+                                <div class="col-md-2 mb-3">
+                                    <button type="button" name="button" value="draft" class="revoke-btn me-2" id="select_all" style="width: 140px; margin-top: 30px">Select All</button>
+                                </div>  
+                            </div> 
+                            <div>
+                                <button type="submit" class="btn btn-primary btn-submit me-2">Submit</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $('#select_all').click(function() {
+        $('#js-select option').attr("selected","selected");
+        $('.formsuccess').show()
+    });
+    $('#deselectAll').click(function() {
+        $('#js-select1 option').removeAttr("selected");
+    });
+</script>
+<script>
+    $('.add').click(function() {
+        var number_of_input     = $('#number_of_input').val();
+        var i                   = parseInt(number_of_input) + parseInt(1);
+        $('#number_of_input').val(i);
+
+        $('#first-remove').show();
+        $('.area_ofexpertise:last').before(
+                                    `<div class=" area_ofexpertise area_ofexpertise_div mt-2">
+                                        <div class="form-group">
+                                            <label for="exampleInputName1">Zone</label>
+                                            <input type="text" name="zone[]" class="form-control" id="exampleInputName1" placeholder="Zone" required>
+                                        </div>
+                                        <a style="width: 43px; margin-left: 96%;" class="revoke-btn remove remove-first"><i class="fa fa-close" style="margin-left: -3px;"></i></a>
+                                        <div class="mb-10 fv-row fv-plugins-icon-container" style="border-top: 1px solid #e4e6ef;"></div>
+                                    </div>
+                                `);
+    });
+
+    $('.new').on('click','.remove',function() {
+        var number_of_input     = $('#number_of_input').val();
+        var i                   = parseInt(number_of_input) - parseInt(1);
+        
+        $('#number_of_input').val(i);
+        if( i == 0)
+        {
+            $('.remove').hide();
+        }
+
+        $(this).parent().remove();
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,1561 @@
+(function($) {
+	'use strict';
+	$(function() {
+		var salesDifferencedata = {
+			labels: ["50+", "35-50", "25-35", "18-25", "0-18"],
+			datasets: [{
+				label: 'Best Sellers',
+				data: [22, 28, 18, 20, 12],
+				backgroundColor: [
+						'#8169f2',
+						'#6a4df5',
+						'#4f2def',
+						'#2b0bc5',
+						'#180183',
+				],
+				borderColor: [
+						'#8169f2',
+						'#6a4df5',
+						'#4f2def',
+						'#2b0bc5',
+						'#180183',
+				],
+				borderWidth: 2,
+				fill: false
+			}],
+		};
+		var salesDifferenceOptions = {
+			scales: {
+				xAxes: [{
+					position: 'bottom',
+					display: false,
+					gridLines: {
+							display: false,
+							drawBorder: true,
+					},
+					ticks: {
+							display: false ,//this will remove only the label
+							beginAtZero: true
+					}
+				}],
+				yAxes: [{
+					display: true,
+					gridLines: {
+						drawBorder: true,
+						display: false,
+					},
+					ticks: {
+						beginAtZero: true
+					},
+				}]
+			},
+			legend: {
+				display: false
+			},
+			tooltips: {
+				show: false,
+				backgroundColor: 'rgba(31, 59, 179, 1)',
+			},
+			plugins: {
+			datalabels: {
+					display: true,
+					align: 'start',
+					color: 'white',
+				}
+			}				
+
+		};
+		if ($("#salesDifference").length) {
+			var barChartCanvas = $("#salesDifference").get(0).getContext("2d");
+			// This will get the first returned node in the jQuery collection.
+			var barChart = new Chart(barChartCanvas, {
+				type: 'horizontalBar',
+				data: salesDifferencedata,
+				options: salesDifferenceOptions,
+
+			});
+		}		
+
+		// ----------------------------------------------------------------------------------
+		var array_length = $('#list_length').val();
+
+		var conversion_pct 	= [];
+		var type_name 		= [];
+		
+		for (var i = 1; i <= array_length; i++) 
+		{
+			var val = parseInt($('#type_pct'+i).val());
+			var name = $('#type_name'+i).val();
+			conversion_pct.push(val);
+			type_name.push(name)
+		}
+
+		var bestSellersData = {
+			datasets: [{
+				data: conversion_pct,
+				backgroundColor: [
+					'#2FEF96',
+					'#FF0000',
+					'#74A7FF',
+					'#B27FF2',
+					'#FFC164',
+					'#CB90C0',
+					'#3B2E51',
+					'#E2C924',
+					'#5DBB81',
+					'#59EA4A',
+					'#8B2DDA',
+					'#59EA4A',
+					'#DE87AF'
+				],
+				borderColor: [
+					'#2FEF96',
+					'#FF0000',
+					'#74A7FF',
+					'#B27FF2',
+					'#FFC164',
+					'#CB90C0',
+					'#3B2E51',
+					'#E2C924',
+					'#5DBB81',
+					'#59EA4A',
+					'#8B2DDA',
+					'#59EA4A',
+					'#DE87AF'
+				],
+			}],
+			// These labels appear in the legend and in the tooltips when hovering different arcs
+			labels: type_name
+		};
+		var bestSellersOptions = {
+			responsive: true,
+			cutoutPercentage: 70,
+			legend: {
+					display: false,
+			},
+			animation: {
+					animateScale: true,
+					animateRotate: true
+			},
+			plugins: {
+				datalabels: {
+					 display: false,
+					 align: 'center',
+					 anchor: 'center'
+				}
+			}				
+	
+		};
+		if ($("#bestSellers").length) {
+			var pieChartCanvas = $("#bestSellers").get(0).getContext("2d");
+			var pieChart = new Chart(pieChartCanvas, {
+				type: 'doughnut',
+				data: bestSellersData,
+				options: bestSellersOptions
+			});
+		}
+
+		// -------------------------------------------------------------------------------
+
+		var joblist_length = $('#job_list_length').val();
+
+		var job_conversion_pct 	= [];
+		var job_name 			= [];
+		
+		for (var i = 1; i <= joblist_length; i++) 
+		{
+			var val = parseInt($('#job_pct'+i).val());
+			var name = $('#job_name'+i).val();
+			job_conversion_pct.push(val);
+			job_name.push(name)
+		}
+
+		var bestJobsData = {
+			datasets: [{
+				data: job_conversion_pct,
+				backgroundColor: [
+					'#B27FF2',
+					'#FF0000',
+					'#2FEF96',
+					'#CB90C0',
+					'#5DBB81',
+					'#59EA4A',
+					'#74A7FF',
+					'#FFA1A1',
+					'#3B2E51',
+					'#E2C924',
+					'#DE87AF',
+					'#ED760E',
+					'#8B2DDA'
+				],
+				borderColor: [
+					'#B27FF2',
+					'#FF0000',
+					'#2FEF96',
+					'#CB90C0',
+					'#5DBB81',
+					'#59EA4A',
+					'#74A7FF',
+					'#FFA1A1',
+					'#3B2E51',
+					'#E2C924',
+					'#DE87AF',
+					'#ED760E',
+					'#8B2DDA'
+				],
+			}],
+			// These labels appear in the legend and in the tooltips when hovering different arcs
+			labels: job_name
+		};
+		var bestJobsOptions = {
+			responsive: true,
+			cutoutPercentage: 70,
+			legend: {
+					display: false,
+			},
+			animation: {
+					animateScale: true,
+					animateRotate: true
+			},
+			plugins: {
+				datalabels: {
+					 display: false,
+					 align: 'center',
+					 anchor: 'center'
+				}
+			}				
+	
+		};
+
+		if ($("#job_data").length) {
+			var pieChartCanvas = $("#job_data").get(0).getContext("2d");
+			var pieChart = new Chart(pieChartCanvas, {
+				type: 'doughnut',
+				data: bestJobsData,
+				options: bestJobsOptions
+			});
+		}
+
+		// ------------------------------------------------------------------------------------------
+		var perarray_length = $('#person_list_length').val();
+
+		var person_conversion_pct 	= [];
+		var person_name 			= [];
+		
+		for (var i = 1; i <= perarray_length; i++) 
+		{
+			var perval = parseInt($('#person_pct'+i).val());
+			var pername = $('#person_name'+i).val();
+			person_conversion_pct.push(perval);
+			person_name.push(pername)
+		}
+
+		var bestJobsData = {
+			datasets: [{
+				data: person_conversion_pct,
+				backgroundColor: [
+					'#74A7FF',
+					'#B27FF2',
+					'#FFC164',
+					'#2FEF96',
+					'#FFA1A1'
+				],
+				borderColor: [
+					'#74A7FF',
+					'#B27FF2',
+					'#FFC164',
+					'#2FEF96',
+					'#FFA1A1'
+				],
+			}],
+			// These labels appear in the legend and in the tooltips when hovering different arcs
+			labels: person_name
+		};
+		var bestJobsOptions = {
+			responsive: true,
+			cutoutPercentage: 70,
+			legend: {
+					display: false,
+			},
+			animation: {
+					animateScale: true,
+					animateRotate: true
+			},
+			plugins: {
+				datalabels: {
+					 display: false,
+					 align: 'center',
+					 anchor: 'center'
+				}
+			}				
+	
+		};
+
+		if ($("#person_data").length) {
+			var pieChartCanvas = $("#person_data").get(0).getContext("2d");
+			var pieChart = new Chart(pieChartCanvas, {
+				type: 'doughnut',
+				data: bestJobsData,
+				options: bestJobsOptions
+			});
+		}
+		// --------------------------------------------------------------------------------------------
+		var barChartStackedData = {
+			datasets: [{
+				label: 'Instagram (40%)',
+				data: [60],
+				backgroundColor: [
+					'#ee5b5b'
+
+				],
+				borderColor: [
+					'#ee5b5b'
+				],
+				borderWidth: 1,
+				fill: false
+			},
+			{
+				label: 'Facebook',
+				data: [25],
+
+				backgroundColor: [
+					'#fcd53b'
+				],
+				borderColor: [
+					'#fcd53b',
+
+				],
+				borderWidth: 1,
+				fill: false
+			},
+			{
+				label: 'Website',
+				data: [10],
+
+				backgroundColor: [
+					'#0bdbb8'
+				],
+				borderColor: [
+					'#0bdbb8',
+
+				],
+				borderWidth: 1,
+				fill: false
+			},
+			{
+				label: 'Youtube',
+				data: [15],
+
+				backgroundColor: [
+					'#444bee'
+				],
+				borderColor: [
+						"#444bee",
+
+				],
+				borderWidth: 1,
+				fill: false
+			}]
+		};
+		var barChartStackedOptions = {
+			scales: {
+				xAxes: [{
+					display: false,
+					stacked: true,
+					gridLines: {
+							display: false //this will remove only the label
+					},
+				}],
+				yAxes: [{
+					stacked: true,
+					display: false,
+				}]
+			},
+			legend: {
+				display: false,
+				position: "bottom"
+			},
+			elements: {
+				point: {
+						radius: 0
+				},
+				plugins: {
+					datalabels: {
+						display: false,
+						align: 'center',
+						anchor: 'center'
+					}
+				}				
+		
+		}
+		};
+		if ($("#barChartStacked").length) {
+			var barChartCanvas = $("#barChartStacked").get(0).getContext("2d");
+			// This will get the first returned node in the jQuery collection.
+			var barChart = new Chart(barChartCanvas, {
+				type: 'horizontalBar',
+				data: barChartStackedData,
+				options: barChartStackedOptions
+			});
+		}
+
+		var data_length 	= $('#list_length').val();
+		var get_single 		= [];
+		var get_group 		= [];
+		var get_male 		= [];
+		var get_female 		= [];
+		var type_name 		= [];
+		var graph_color_1	= [];
+		var graph_color_2	= [];
+		var graph_color_3	= [];
+		
+		for (var i = 1; i <= data_length; i++) 
+		{
+			var val 	= parseInt($('#type_pct'+i).val());
+			var name 	= $('#type_name'+i).val();
+			var male 	= $('#type_male'+i).val() != null ? $('#type_male'+i).val() : 0;
+			var female 	= $('#type_female'+i).val() != null ? $('#type_female'+i).val() : 0;
+			var single 	= $('#type_single'+i).val() != null ? $('#type_single'+i).val() : 0;
+			var group 	= $('#type_group'+i).val() != null ? $('#type_group'+i).val() : 0;
+			type_name.push(name);
+			get_single.push(single);
+			get_group.push(group);
+			get_male.push(male);
+			get_female.push(female);
+			graph_color_1.push('#464dee');
+			graph_color_2.push('#d8d8d8');
+			graph_color_3.push('#0ddbb9');
+		}
+		
+		var revenueChartData = {
+			labels: type_name,
+			datasets: [{
+				label: 'Single',
+				data: get_single,
+				backgroundColor: [
+						'#0ddbb9',
+				],
+				borderColor: [
+						'#0ddbb9'
+				],
+				borderWidth: 2,
+				fill: false,
+			},
+			{
+				label: 'Group',
+				borderDash: [3, 4],
+				data: get_group,
+				borderColor: [
+						'#464dee',
+				],
+				borderWidth: 2,
+				fill: false,
+				pointBorderWidth: 4,
+			},
+			// {
+			// 	label: 'Cost',
+			// 	data: [25, 25, 50, 50, 30, 30, 50, 40, 45, 40, 35, 35],
+			// 	borderColor: [
+			// 			'#ee5b5b',
+			// 	],
+			// 	borderWidth: 2,
+			// 	fill: false,
+			// 	pointBorderWidth: 4,
+			// }
+			],
+		};
+		var revenueChartOptions = {
+			scales: {
+					yAxes: [{
+						display: true,
+						gridLines: {
+							drawBorder: false,
+							display: false,
+						},
+					}],
+					xAxes: [{
+						position: 'bottom',
+						gridLines: {
+							drawBorder: false,
+							display: false,
+						},
+						ticks: {
+							beginAtZero: true,
+							stepSize: 30
+						}
+					}],
+
+			},
+			legend: {
+					display: false,
+			},
+			legendCallback: function(chart) {
+				var text = [];
+				text.push('<ul class="' + chart.id + '-legend">');
+				for (var i = 0; i < chart.data.datasets.length; i++) {
+					text.push('<li><span class="legend-box" style="background:' + chart.data.datasets[i].borderColor + ';"></span><span class="legend-label" style="">');
+					if (chart.data.datasets[i].label) {
+							text.push(chart.data.datasets[i].label);
+					}
+					text.push('</span></li>');
+				}
+				text.push('</ul>');
+				return text.join("");
+			},
+			elements: {
+				point: {
+					radius: 0
+				},
+				line: {
+					tension: 0
+				}
+			},
+			tooltips: {
+				backgroundColor: 'rgba(2, 171, 254, 1)',
+			},
+			plugins: {
+				datalabels: {
+					display: false,
+					align: 'center',
+					anchor: 'center'
+				}
+			}				
+	
+		};
+		if ($("#revenue-for-last-month-chart").length) {
+			var lineChartCanvas = $("#revenue-for-last-month-chart").get(0).getContext("2d");
+			var saleschart = new Chart(lineChartCanvas, {
+				type: 'line',
+				data: revenueChartData,
+				options: revenueChartOptions
+			});
+			document.getElementById('revenuechart-legend').innerHTML = saleschart.generateLegend();
+		}
+
+		var serveLoadingData = {
+			labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "No", "Dec"],
+			datasets: [{
+				label: 'Margin',
+				data: [45, 45, 70, 70, 50, 50, 70, 60, 65, 60, 55, 55],
+				backgroundColor: [
+						'#0ddbb9',
+				],
+				borderColor: [
+						'#0ddbb9'
+				],
+				borderWidth: 2,
+				fill: false,
+			},
+			{
+				label: 'Product',
+				borderDash: [3, 4],
+				data: [35, 35, 60, 60, 40, 40, 60, 50, 55, 50, 45, 45],
+				borderColor: [
+						'#464dee',
+				],
+				borderWidth: 2,
+				fill: false,
+				pointBorderWidth: 4,
+			},
+			{
+				label: 'Cost',
+				data: [25, 25, 50, 50, 30, 30, 50, 40, 45, 40, 35, 35],
+				borderColor: [
+						'#ee5b5b',
+				],
+				borderWidth: 2,
+				fill: false,
+				pointBorderWidth: 4,
+			}],
+		};
+		var serveLoadingOptions = {
+			scales: {
+				yAxes: [{
+					display: true,
+					gridLines: {
+						drawBorder: false,
+						display: false,
+					},
+				}],
+				xAxes: [{
+					position: 'bottom',
+					gridLines: {
+						drawBorder: false,
+						display: false,
+					},
+					ticks: {
+						beginAtZero: false,
+						stepSize: 200
+					}
+				}],
+
+			},
+			legend: {
+				display: false,
+			},
+			legendCallback: function(chart) {
+				var text = [];
+				text.push('<ul class="' + chart.id + '-legend">');
+				for (var i = 0; i < chart.data.datasets.length; i++) {
+					text.push('<li><span class="legend-box" style="background:' + chart.data.datasets[i].borderColor + ';"></span><span class="legend-label" style="">');
+					if (chart.data.datasets[i].label) {
+							text.push(chart.data.datasets[i].label);
+					}
+					text.push('</span></li>');
+				}
+				text.push('</ul>');
+				return text.join("");
+			},
+			elements: {
+				point: {
+					radius: 0
+				},
+				line: {
+					tension: 0
+				}
+			},
+			tooltips: {
+				backgroundColor: 'rgba(2, 171, 254, 1)',
+			},
+			plugins: {
+				datalabels: {
+					display: false,
+					align: 'center',
+					anchor: 'center'
+				}
+			}				
+	
+		};
+		if ($("#serveLoading").length) {
+			var lineChartCanvas = $("#serveLoading").get(0).getContext("2d");
+			var saleschart = new Chart(lineChartCanvas, {
+				type: 'line',
+				data: serveLoadingData,
+				options: serveLoadingOptions
+			});
+			document.getElementById('serveLoading-legend').innerHTML = saleschart.generateLegend();
+		}
+		var dataManagedData = {
+			labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "No", "Dec"],
+			datasets: [{
+						label: 'Margin',
+						data: [45, 45, 70, 70, 50, 50, 70, 60, 65, 60, 55, 55],
+						backgroundColor: [
+							'#0ddbb9',
+						],
+						borderColor: [
+							'#0ddbb9'
+						],
+						borderWidth: 2,
+						fill: false,
+					},
+					{
+						label: 'Product',
+						borderDash: [3, 4],
+						data: [35, 35, 60, 60, 40, 40, 60, 50, 55, 50, 45, 45],
+						borderColor: [
+								'#464dee',
+						],
+						borderWidth: 2,
+						fill: false,
+						pointBorderWidth: 4,
+					},
+					{
+						label: 'Cost',
+						data: [25, 25, 50, 50, 30, 30, 50, 40, 45, 40, 35, 35],
+						borderColor: [
+								'#ee5b5b',
+						],
+						borderWidth: 2,
+						fill: false,
+						pointBorderWidth: 4,
+					}
+			],
+		};
+		var dataManagedOptions = {
+			scales: {
+				yAxes: [{
+					display: true,
+					gridLines: {
+						drawBorder: false,
+						display: false,
+					},
+				}],
+				xAxes: [{
+					position: 'bottom',
+					gridLines: {
+						drawBorder: false,
+						display: false,
+					},
+					ticks: {
+						beginAtZero: false,
+						stepSize: 200
+					}
+				}],
+			},
+			legend: {
+				display: false,
+			},
+			legendCallback: function(chart) {
+				var text = [];
+				text.push('<ul class="' + chart.id + '-legend">');
+				for (var i = 0; i < chart.data.datasets.length; i++) {
+					text.push('<li><span class="legend-box" style="background:' + chart.data.datasets[i].borderColor + ';"></span><span class="legend-label" style="">');
+					if (chart.data.datasets[i].label) {
+							text.push(chart.data.datasets[i].label);
+					}
+					text.push('</span></li>');
+				}
+				text.push('</ul>');
+				return text.join("");
+			},
+			elements: {
+				point: {
+					radius: 0
+				},
+				line: {
+					tension: 0
+				}
+			},
+			tooltips: {
+				backgroundColor: 'rgba(2, 171, 254, 1)',
+			},
+			plugins: {
+				datalabels: {
+					display: false,
+					align: 'center',
+					anchor: 'center'
+				}
+			}					
+		};
+		if ($("#dataManaged").length) {
+			var lineChartCanvas = $("#dataManaged").get(0).getContext("2d");
+			var saleschart = new Chart(lineChartCanvas, {
+				type: 'line',
+				data: dataManagedData,
+				options: serveLoadingOptions
+			});
+			document.getElementById('dataManaged-legend').innerHTML = saleschart.generateLegend();
+		}
+		var salesTraficData = {
+			labels: type_name,
+			datasets: [{
+				label: 'Male',
+				data: get_male,
+				backgroundColor: [
+						'#0ddbb9',
+				],
+				borderColor: [
+						'#0ddbb9'
+				],
+				borderWidth: 2,
+				fill: false,
+				},
+				// {
+				// label: 'Product',
+				// borderDash: [3, 4],
+				// data: [35, 35, 60, 60, 40, 40, 60, 50, 55, 50, 45, 45],
+				// borderColor: [
+				// 		'#464dee',
+				// ],
+				// borderWidth: 2,
+				// fill: false,
+				// pointBorderWidth: 4,
+				// },
+				{
+				label: 'Female',
+				data: get_female,
+				borderColor: [
+						'#ee5b5b',
+				],
+				borderWidth: 2,
+				fill: false,
+				pointBorderWidth: 4,
+				}
+			],
+		};
+		var salesTraficOptions = {
+			scales: {
+				yAxes: [{
+					display: true,
+					gridLines: {
+						drawBorder: false,
+						display: false,
+					},
+				}],
+				xAxes: [{
+					position: 'bottom',
+					gridLines: {
+						drawBorder: false,
+						display: false,
+					},
+					ticks: {
+						beginAtZero: false,
+						stepSize: 200
+					}
+				}],
+
+			},
+			legend: {
+				display: false,
+			},
+			legendCallback: function(chart) {
+				var text = [];
+				text.push('<ul class="' + chart.id + '-legend">');
+				for (var i = 0; i < chart.data.datasets.length; i++) {
+					text.push('<li><span class="legend-box" style="background:' + chart.data.datasets[i].borderColor + ';"></span><span class="legend-label" style="">');
+					if (chart.data.datasets[i].label) {
+							text.push(chart.data.datasets[i].label);
+					}
+					text.push('</span></li>');
+				}
+				text.push('</ul>');
+				return text.join("");
+			},
+			elements: {
+					point: {
+						radius: 0
+					},
+					line: {
+						tension: 0
+					}
+			},
+			tooltips: {
+					backgroundColor: 'rgba(2, 171, 254, 1)',
+			},
+			plugins: {
+				datalabels: {
+					display: false,
+					align: 'center',
+					anchor: 'center'
+				}
+			}				
+	
+		};
+		if ($("#salesTrafic").length) {
+			var lineChartCanvas = $("#salesTrafic").get(0).getContext("2d");
+			var saleschart = new Chart(lineChartCanvas, {
+				type: 'line',
+				data: salesTraficData,
+				options: salesTraficOptions
+			});
+			document.getElementById('salesTrafic-legend').innerHTML = saleschart.generateLegend();
+		}
+
+		var visitorsTodayData = {
+			labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug"],
+			datasets: [
+				{
+				label: 'Cost',
+				data: [15, 25, 20, 18, 24, 20, 16, 20],
+				backgroundColor: [
+						'rgba(238, 91, 91, .9)',
+				],
+				borderColor: [
+						'#ee5b5b',
+				],
+				borderWidth: 2,
+				fill: true,
+				pointBorderWidth: 4,
+				},
+				{
+				label: 'Product',
+				data: [20, 30, 25, 23, 29, 25, 21, 25],
+				backgroundColor: [
+						'rgba(70, 77, 238, 1)',
+				],
+				borderColor: [
+						'#464dee',
+				],
+				borderWidth: 2,
+				fill: true,
+				pointBorderWidth: 4,
+				},
+				{
+				label: 'Margin',
+				data: [25, 35, 30, 28, 33, 30, 26, 30],
+				backgroundColor: [
+						'rgba(81, 225, 195, .9)',
+				],
+				borderColor: [
+						'#51e1c3'
+				],
+				borderWidth: 2,
+				fill: true,
+				},
+			],
+		};
+		var visitorsTodayOptions = {
+			scales: {
+				yAxes: [{
+					display: false,
+					gridLines: {
+						drawBorder: false,
+						display: false,
+					},
+				}],
+				xAxes: [{
+					position: 'bottom',
+					display: true,
+					gridLines: {
+						drawBorder: false,
+						display: true,
+						color: "#f2f2f2",
+						borderDash: [8, 4],
+					},
+					ticks: {
+						beginAtZero: false,
+						stepSize: 200
+					}
+				}],
+			},
+			legend: {
+				display: false,
+			},
+			elements: {
+					point: {
+						radius: 0
+					},
+			},
+			plugins: {
+				datalabels: {
+					display: false,
+					align: 'center',
+					anchor: 'center'
+				}
+			}				
+		};
+		if ($("#visitorsToday").length) {
+			var lineChartCanvas = $("#visitorsToday").get(0).getContext("2d");
+			var saleschart = new Chart(lineChartCanvas, {
+				type: 'line',
+				data: visitorsTodayData,
+				options: visitorsTodayOptions
+			});
+		}
+		if ($('#circleProgress1').length) {
+			var bar = new ProgressBar.Circle(circleProgress1, {
+				color: '#0aadfe',
+				strokeWidth: 10,
+				trailWidth: 10,
+				easing: 'easeInOut',
+				duration: 1400,
+				width: 42,
+			});
+			bar.animate(.18); // Number from 0.0 to 1.0
+		}
+		if ($('#circleProgress2').length) {
+			var bar = new ProgressBar.Circle(circleProgress2, {
+				color: '#fa424a',
+				strokeWidth: 10,
+				trailWidth: 10,
+				easing: 'easeInOut',
+				duration: 1400,
+				width: 42,
+
+			});
+			bar.animate(.36); // Number from 0.0 to 1.0
+		}
+		var newClientData = {
+			labels: ["Jan", "Feb", "Mar", "Apr", "May"],
+			datasets: [{
+				label: 'Margin',
+				data: [35, 37, 34, 36, 32],
+				backgroundColor: [
+						'#f7f7f7',
+				],
+				borderColor: [
+						'#dcdcdc'
+				],
+				borderWidth: 2,
+				fill: true,
+			},],
+		};
+		var newClientOptions = {
+			scales: {
+				yAxes: [{
+					display: false,
+				}],
+				xAxes: [{
+					display: false,
+				}],
+			},
+			legend: {
+				display: false,
+			},
+			elements: {
+				point: {
+					radius: 0
+				},		
+			},
+			plugins: {
+				datalabels: {
+					display: false,
+					align: 'center',
+					anchor: 'center'
+				}
+			}				
+		};
+		if ($("#newClient").length) {
+			var lineChartCanvas = $("#newClient").get(0).getContext("2d");
+			var saleschart = new Chart(lineChartCanvas, {
+				type: 'line',
+				data: newClientData,
+				options: newClientOptions
+			});
+		}
+		var allProductsData = {
+			labels: ["Jan", "Feb", "Mar", "Apr", "May"],
+			datasets: [{
+				label: 'Margin',
+				data: [37, 36, 37, 35, 36],
+				backgroundColor: [
+						'#f7f7f7',
+				],
+				borderColor: [
+						'#dcdcdc'
+				],
+				borderWidth: 2,
+				fill: true,
+			}, ],
+		};
+		var allProductsOptions = {
+			scales: {
+				yAxes: [{
+					display: false,
+				}],
+				xAxes: [{
+					display: false,
+				}],
+			},
+			legend: {
+				display: false,
+			},
+			elements: {
+				point: {
+					radius: 0
+				},
+			},
+			plugins: {
+				datalabels: {
+					display: false,
+					align: 'center',
+					anchor: 'center'
+				}
+			}				
+	
+		};
+		if ($("#allProducts").length) {
+			var lineChartCanvas = $("#allProducts").get(0).getContext("2d");
+			var saleschart = new Chart(lineChartCanvas, {
+				type: 'line',
+				data: allProductsData,
+				options: allProductsOptions
+			});
+		}
+		var invoicesData = {
+			labels: ["Jan", "Feb", "Mar", "Apr", "May"],
+			datasets: [{
+				label: 'Margin',
+				data: [35, 37, 34, 36, 32],
+				backgroundColor: [
+						'#f7f7f7',
+				],
+				borderColor: [
+						'#dcdcdc'
+				],
+				borderWidth: 2,
+				fill: true,
+			}, ],
+		};
+		var invoicesOptions = {
+			scales: {
+				yAxes: [{
+					display: false,
+				}],
+				xAxes: [{
+					display: false,
+				}],
+			},
+			legend: {
+				display: false,
+			},
+			elements: {
+					point: {
+						radius: 0
+					},
+			},
+			plugins: {
+				datalabels: {
+					display: false,
+					align: 'center',
+					anchor: 'center'
+				}
+			}				
+	
+		};
+		if ($("#invoices").length) {
+			var lineChartCanvas = $("#invoices").get(0).getContext("2d");
+			var saleschart = new Chart(lineChartCanvas, {
+				type: 'line',
+				data: invoicesData,
+				options: invoicesOptions
+			});
+		}
+		var projectsData = {
+			labels: ["Jan", "Feb", "Mar", "Apr", "May"],
+			datasets: [{
+				label: 'Margin',
+				data: [38, 39, 37, 40, 36],
+					backgroundColor: [
+							'#f7f7f7',
+					],
+				borderColor: [
+						'#dcdcdc'
+				],
+				borderWidth: 2,
+				fill: true,
+			}, ],
+		};
+		var projectsOptions = {
+			scales: {
+				yAxes: [{
+					display: false,
+				}],
+				xAxes: [{
+					display: false,
+				}],
+			},
+			legend: {
+				display: false,
+			},
+			elements: {
+				point: {
+					radius: 0
+				},
+			},
+			plugins: {
+				datalabels: {
+					display: false,
+					align: 'center',
+					anchor: 'center'
+				}
+			}					
+		};
+		if ($("#projects").length) {
+			var lineChartCanvas = $("#projects").get(0).getContext("2d");
+			var saleschart = new Chart(lineChartCanvas, {
+				type: 'line',
+				data: projectsData,
+				options: projectsOptions
+			});
+		}
+		var orderRecievedData = {
+			labels: ["Jan", "Feb", "Mar", "Apr", "May"],
+			datasets: [{
+				label: 'Margin',
+				data: [35, 37, 34, 36, 32],
+				backgroundColor: [
+						'#f7f7f7',
+				],
+				borderColor: [
+						'#dcdcdc'
+				],
+				borderWidth: 2,
+				fill: true,
+			}, ],
+		};
+		var orderRecievedOptions = {
+			scales: {
+				yAxes: [{
+					display: false,
+				}],
+				xAxes: [{
+					display: false,
+				}],
+			},
+			legend: {
+				display: false,
+			},
+			elements: {
+				point: {
+					radius: 0
+				},
+			},
+			plugins: {
+				datalabels: {
+					display: false,
+					align: 'center',
+					anchor: 'center'
+				}
+			}				
+	
+		};
+		if ($("#orderRecieved").length) {
+			var lineChartCanvas = $("#orderRecieved").get(0).getContext("2d");
+			var saleschart = new Chart(lineChartCanvas, {
+				type: 'line',
+				data: orderRecievedData,
+				options: orderRecievedOptions
+			});
+		}
+		var transactionsData = {
+			labels: ["Jan", "Feb", "Mar", "Apr", "May"],
+			datasets: [{
+				label: 'Margin',
+				data: [38, 35, 36, 38, 34],
+				backgroundColor: [
+						'#f7f7f7',
+				],
+				borderColor: [
+						'#dcdcdc'
+				],
+				borderWidth: 2,
+				fill: true,
+			}, ],
+		};
+		var transactionsOptions = {
+			scales: {
+				yAxes: [{
+					display: false,
+				}],
+				xAxes: [{
+					display: false,
+				}],
+			},
+			legend: {
+				display: false,
+			},
+			elements: {
+				point: {
+					radius: 0
+				},
+			},
+			plugins: {
+				datalabels: {
+					display: false,
+					align: 'center',
+					anchor: 'center'
+				}
+			}				
+		};
+		if ($("#transactions").length) {
+			var lineChartCanvas = $("#transactions").get(0).getContext("2d");
+			var saleschart = new Chart(lineChartCanvas, {
+				type: 'line',
+				data: transactionsData,
+				options: transactionsOptions
+			});
+		}
+
+		var graph_array_length	= $('#graphDataLength').val();
+		var staff_conversion_pct 	= [];
+		var staff_type_name 		= [];
+		var graph_color 			= [];
+		for (var i = 1; i <= graph_array_length; i++) 
+		{
+			var staff_name 	= $('#staff_name'+i).val();
+			var staff_pct 	= parseInt($('#conversion_perc'+i).val());
+			staff_conversion_pct.push(staff_pct);
+			staff_type_name.push(staff_name)
+			graph_color.push('#4CB8C4')
+		}
+
+		var supportTrackerData = {
+			labels: staff_type_name,
+			datasets: [{
+				label: 'Percentage of conversion',
+				data: staff_conversion_pct,
+				backgroundColor:graph_color,
+				borderColor: graph_color,
+				borderWidth: 1,
+				fill: false
+			}
+			]
+		};
+		var supportTrackerOptions = {
+			scales: {
+				xAxes: [{
+				stacked: true,
+				barPercentage: 0.3,
+				position: 'bottom',
+				display: true,
+				gridLines: {
+					display: false,
+					drawBorder: false,
+				},
+				ticks: {
+					display: true, //this will remove only the label
+					stepSize: 100,
+				}
+				}],
+				yAxes: [{
+					stacked: true,
+					display: true,
+					gridLines: {
+						drawBorder: false,
+						display: true,
+						color: "#f0f3f6",
+						borderDash: [8, 4],
+					},
+					ticks: {
+						beginAtZero: true,
+						callback: function(value, index, values) {
+						return '%' + value;
+						}
+					},
+				}]
+			},
+			legend: {
+				display: false
+			},
+			legendCallback: function(chart) {
+				var text = [];
+				text.push('<ul class="' + chart.id + '-legend">');
+				for (var i = 0; i < chart.data.datasets.length; i++) {
+					text.push('<li><span class="legend-box" style="background:' + chart.data.datasets[i].backgroundColor[i] + ';"></span><span class="legend-label text-dark">');
+					if (chart.data.datasets[i].label) {
+							text.push(chart.data.datasets[i].label);
+					}
+					text.push('</span></li>');
+				}
+				text.push('</ul>');
+				return text.join("");
+			},
+			tooltips: {
+				backgroundColor: 'rgba(0, 0, 0, 1)',
+			},
+			plugins: {
+				datalabels: {
+					display: false,
+					align: 'center',
+					anchor: 'center'
+				}
+			}				
+		};
+		if ($("#supportTracker").length) {
+			var barChartCanvas = $("#supportTracker").get(0).getContext("2d");
+			// This will get the first returned node in the jQuery collection.
+			var barChart = new Chart(barChartCanvas, {
+				type: 'bar',
+				data: supportTrackerData,
+				options: supportTrackerOptions
+			});
+			document.getElementById('support-tracker-legend').innerHTML = barChart.generateLegend();
+		}
+
+
+		// ##############-------Male Female-----
+		var maleFemalesupportTrackerData = {
+			labels: type_name,
+			datasets: [{
+				label: 'Male',
+				data: get_male,
+				backgroundColor: graph_color_3,
+				borderColor: graph_color_3,
+				borderWidth: 1,
+				fill: false
+			},
+			{
+					label: 'Female',
+					data: get_female,					
+					backgroundColor: graph_color_2,
+					borderColor: graph_color_2,
+					borderWidth: 1,
+					fill: false
+			}
+			]
+		};
+		var maleFemalesupportTrackerOptions = {
+			scales: {
+				xAxes: [{
+				stacked: true,
+				barPercentage: 0.6,
+				position: 'bottom',
+				display: true,
+				gridLines: {
+					display: false,
+					drawBorder: false,
+				},
+				ticks: {
+					display: true, //this will remove only the label
+					stepSize: 300,
+				}
+				}],
+				yAxes: [{
+					stacked: true,
+					display: true,
+					gridLines: {
+						drawBorder: false,
+						display: true,
+						color: "#f0f3f6",
+						borderDash: [8, 4],
+					},
+					ticks: {
+						beginAtZero: true,
+						callback: function(value, index, values) {
+						return value;
+						}
+					},
+				}]
+			},
+			legend: {
+				display: false
+			},
+			legendCallback: function(chart) {
+				var text = [];
+				text.push('<ul class="' + chart.id + '-legend">');
+				for (var i = 0; i < chart.data.datasets.length; i++) {
+					text.push('<li><span class="legend-box" style="background:' + chart.data.datasets[i].backgroundColor[i] + ';"></span><span class="legend-label text-dark">');
+					if (chart.data.datasets[i].label) {
+							text.push(chart.data.datasets[i].label);
+					}
+					text.push('</span></li>');
+				}
+				text.push('</ul>');
+				return text.join("");
+			},
+			tooltips: {
+				backgroundColor: 'rgba(0, 0, 0, 1)',
+			},
+			plugins: {
+				datalabels: {
+					display: false,
+					align: 'center',
+					anchor: 'center'
+				}
+			}				
+		};
+		if ($("#maleFemaleTracker").length) {
+			var barChartCanvas = $("#maleFemaleTracker").get(0).getContext("2d");
+			// This will get the first returned node in the jQuery collection.
+			var barChart = new Chart(barChartCanvas, {
+				type: 'bar',
+				data: maleFemalesupportTrackerData,
+				options: maleFemalesupportTrackerOptions
+			});
+			document.getElementById('maleFemale-tracker-legend').innerHTML = barChart.generateLegend();
+		}
+		// ##############------------
+	
+
+		// ##############-------Single group-----
+		var singleGrpsupportTrackerData = {
+			labels: type_name,
+			datasets: [{
+				label: 'Single',
+				data: get_single,
+				backgroundColor: graph_color_1,
+				borderColor: graph_color_1,
+				borderWidth: 1,
+				fill: false
+			},
+			{
+					label: 'Group',
+					data: get_group,					
+					backgroundColor:graph_color_2,
+					borderColor: graph_color_2,
+					borderWidth: 1,
+					fill: false
+			}
+			]
+		};
+		var singleGrpsupportTrackerOptions = {
+			scales: {
+				xAxes: [{
+				stacked: true,
+				barPercentage: 0.6,
+				position: 'bottom',
+				display: true,
+				gridLines: {
+					display: false,
+					drawBorder: false,
+				},
+				ticks: {
+					display: true, //this will remove only the label
+					stepSize: 300,
+				}
+				}],
+				yAxes: [{
+					stacked: true,
+					display: true,
+					gridLines: {
+						drawBorder: false,
+						display: true,
+						color: "#f0f3f6",
+						borderDash: [8, 4],
+					},
+					ticks: {
+						beginAtZero: true,
+						callback: function(value, index, values) {
+						return value;
+						}
+					},
+				}]
+			},
+			legend: {
+				display: false
+			},
+			legendCallback: function(chart) {
+				var text = [];
+				text.push('<ul class="' + chart.id + '-legend">');
+				for (var i = 0; i < chart.data.datasets.length; i++) {
+					text.push('<li><span class="legend-box" style="background:' + chart.data.datasets[i].backgroundColor[i] + ';"></span><span class="legend-label text-dark">');
+					if (chart.data.datasets[i].label) {
+							text.push(chart.data.datasets[i].label);
+					}
+					text.push('</span></li>');
+				}
+				text.push('</ul>');
+				return text.join("");
+			},
+			tooltips: {
+				backgroundColor: 'rgba(0, 0, 0, 1)',
+			},
+			plugins: {
+				datalabels: {
+					display: false,
+					align: 'center',
+					anchor: 'center'
+				}
+			}				
+		};
+		if ($("#singleGrpTracker").length) {
+			var barChartCanvas = $("#singleGrpTracker").get(0).getContext("2d");
+			// This will get the first returned node in the jQuery collection.
+			var barChart = new Chart(barChartCanvas, {
+				type: 'bar',
+				data: singleGrpsupportTrackerData,
+				options: singleGrpsupportTrackerOptions
+			});
+			document.getElementById('singleGrp-tracker-legend').innerHTML = barChart.generateLegend();
+		}
+		// ##############------------
+
+
+		var productorderGage = new JustGage({
+			id: 'productorder-gage',
+			value: 3245,
+			min: 0,
+			max: 5000,
+			hideMinMax: true,
+			symbol: 'K',
+			label: 'You have done 57.6% more ordes today',
+			valueFontColor: "#001737",
+			labelFontColor: "#001737",
+			gaugeWidthScale: 0.3,
+			counter: true,
+			relativeGaugeSize: true,
+			gaugeColor: "#f0f0f0",
+			levelColors: [ "#fcd53b" ]
+		});
+		$("#productorder-gage").append('<div class="product-order"><div class="icon-inside-circle"><i class="mdi mdi-basket"></i></div></div>');
+
+		// Remove pro banner on close
+    document.querySelector('#bannerClose').addEventListener('click',function() {
+			$('#pro-banner').slideUp();
+    });
+	});
+
+	
+})(jQuery);

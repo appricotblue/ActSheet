@@ -1,0 +1,203 @@
+{% extends "admin/layouts/app.html" %}
+{% block content %}
+<div class="container-fluid page-body-wrapper">
+    <div class="main-panel">
+        <div class="content-wrapper">
+            
+            {% if request.session.adminId or request.session.teamLeadertId %}
+            <div class="row mt-3" style="float: right;">
+                <div class="col">
+                    <a href="{% url 'import' %}?id={{task_id}}" id="export" style="height: 35px;" class="revoke-btn">Import</a>
+                </div>
+            </div>
+            {% endif %}
+            <div class="row my-3">
+                <div class="col" style="margin-left: 10px;">
+                    <h4 class="card-title div-title">Customers</h4>
+                </div>
+                {% if request.session.agentId and submit_tl == False or not request.session.agentId %}
+                    {% if request.session.agentId and is_expired == False or request.session.agentId and time_out == False or not request.session.agentId %}
+                    <div class="col" style="text-align: right;">
+                        {% if request.session.agentId and customer_list|length != 0 %}
+                        <a href="{% url 'task-submit' %}?id={{task_id}}" class="revoke-btn me-3" style="width: 186px;height: 36px;">Submit to Team Leader</a>
+                        {% endif %}
+                        <a href="{% url 'add-customer' %}?id={{task_id}}" style="height: 35px;" class="btn-add btn btn-block btn-primary btn-sm font-weight-medium auth-form-btn">+ ADD NEW</a>
+                    </div>
+                    {% else %}
+                    <div class="col" style="text-align: right;">
+                        <a href="{% url 'delay-task-request' %}?id={{task_id}}" class="revoke-btn me-3" style="width: 200px;height: 36px;">Request To Additional Time</a>
+                    </div>
+                    {% endif %}
+                {% else %}
+                <div class="col" style="text-align: right;">
+                    <a href="{% url 'task-request' %}?id={{task_id}}" class="revoke-btn me-3" style="width: 200px;height: 36px;">Request To Edit Data</a>
+                    {% if request.session.agentId and is_expired == False or request.session.agentId and time_out == False or not request.session.agentId %}
+                        {% if request.session.agentId and customer_list|length != 0 %}
+                        <a href="{% url 'task-submit' %}?id={{task_id}}" class="revoke-btn me-3" style="width: 186px;height: 36px;">Submit to Team Leader</a>
+                        {% endif %}
+                    <a href="{% url 'add-customer' %}?id={{task_id}}" style="height: 35px;" class="btn-add btn btn-block btn-primary btn-sm font-weight-medium auth-form-btn">+ ADD NEW</a>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+            <div class="row">
+                <div class="col-lg-12 grid-margin stretch-card">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="mb-4">
+                                <a href="{% url 'list-task' %}">
+                                    <div style = "display : inline-block" class="me-2">
+                                        <i class="fa fa-arrow-left card-title"></i>
+                                    </div>
+                                </a>
+                                <div style = "display : inline-block">
+                                    <h4 class="card-title">List Customer Data</h4>
+                                </div>
+                            </div>
+                            <div>
+                            {% if messages %}
+                                {% for message in messages %}
+                                    <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}" role="alert">{{ message }}</div>
+                                {% endfor %}
+                            {% endif %}
+                            </div>
+                            <div class="table-responsive">
+                                {% if customer_list %}
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <!-- <th>Sl. No</th> -->
+                                            <th>Date</th>
+                                            <th>Customer ID</th>
+                                            <th>Entry Time</th>
+                                            <th>Exit Time</th>
+                                            <th>Dwell Time</th>
+                                            <!-- <th>Visited Zones</th>
+                                            <th>Window Zones</th> -->
+                                            <th>Attended staffs</th>
+                                            <th>Converted Staff Name</th>
+                                            <th>Conversion Status</th>
+                                            <th>Repeat Customer</th>
+                                            {% if time_out == False or not request.session.agentId %}
+                                            <th>Action</th>
+                                            {% endif %}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for x in customer_list %}
+                                        <tr>
+                                            <!-- <td class="py-1">
+                                                {{x.id}}
+                                            </td> -->
+                                            <td>
+                                                {{ x.date|date:"M d, Y" }}
+                                            </td>
+                                            <td>
+                                                {{x.customer_id}}
+                                            </td>
+                                            <td>
+                                                {{x.customer_entry_time}}
+                                            </td>
+                                            <td>
+                                                {{x.customer_exit_time}}
+                                            </td>
+                                            <td>
+                                                {{x.dwell_time}}
+                                            </td>
+                                            <!-- <td>
+                                                {{x.zone_ids}}
+                                            </td>
+                                            <td>
+                                                {{x.window_zone_ids}}
+                                            </td> -->
+                                            <td>
+                                                {{x.attend_staffs}}
+                                            </td>
+                                            <td>
+                                                {% if x.conversion_to.name %}
+                                                {{x.conversion_to.name}}
+                                                {% else %}
+                                                NA
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if x.conversion_status == True%}
+                                                    Yes
+                                                {% else %}
+                                                    No
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if x.repeat_customer == True%}
+                                                    Yes
+                                                {% else %}
+                                                    No
+                                                {% endif %}
+                                            </td>
+                                            {% if time_out == False or not request.session.agentId %}
+                                            <td>
+                                                {% if request.session.agentId and x.submit_tl == False or not request.session.agentId %}
+                                                <a href="{% url 'edit-customer' %}?id={{x.id}}">
+                                                    <i class="mdi mdi-grease-pencil text-primary text-success me-2"></i>
+                                                </a>
+                                                <a href="#" class="delete-btn" id="{{x.id}}" onclick="document.getElementById('id01').style.display='block'">
+                                                    <i class="mdi mdi-delete text-primary text-success me-2"></i>
+                                                </a>
+                                                {% endif %}
+                                            </td>
+                                            {% endif %}
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                                {% else %}
+                                <div style="text-align: center; font-weight: 600;">
+                                    No Data Found
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- -----------------Delete model popup------------------ -->
+<div id="id01" class="modal">
+    <span onclick="document.getElementById('id01').style.display='none'" class="close" title="Close Modal">×</span>
+    <form class="modal-content" action="{% url 'delete-customer' %}" method="get">
+      <div class="container">
+        <h1 class="mt-3">Delete Data</h1>
+        <p class="mt-3">Are you sure you want to delete?</p>
+        <input type="hidden" name="id" id="delete-id">
+        <div class="clearfix">
+          <button type="button" onclick="document.getElementById('id01').style.display='none'" class="cancelbtn">Cancel</button>
+          <button type="submit" class="deletebtn">Delete</button>
+        </div>
+      </div>
+    </form>
+</div>
+
+
+<script>
+    // Get the modal
+    var modal = document.getElementById('id01');
+
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function(event) {
+    if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+
+    $(document).ready(function() {
+        $('.delete-btn').on('click', function(e){
+            var id  = $(this).attr('id');
+            $('#delete-id').val(id);
+        });
+    });
+</script>
+<!-- -----------------Delete model popup------------------ -->
+{% endblock %}

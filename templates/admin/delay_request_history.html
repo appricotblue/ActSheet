@@ -1,0 +1,253 @@
+{% extends "admin/layouts/app.html" %}
+{% block content %}
+<style>
+    .select2{
+        margin-top: -91px;
+        margin-left: 62px;
+        width: 215px !important;
+    }
+    .type{
+        margin-top: -50px;
+        width: 215px !important;
+        height: 33px;
+        margin-left: -95px;
+    }
+    .error{
+        margin-left: -91px;
+    }
+    .select2-selection--single {
+        background-color: #fff;
+        border-radius: 4px;
+        height: 35px !important;
+        border: none !important;
+    }
+    .client-error{
+        margin-top: -30px;
+        margin-left: 138px;
+    }
+
+    @media (max-width:480px){
+        .filter-container, .search-item{
+            margin-top: 0 !important;
+            margin-left: 0 !important;
+        }
+        
+        .type{
+            margin-left: 0px !important;
+            margin-top: -30px !important;
+            width: 270px !important;
+        }
+        .select2{
+            margin-top: 29px;
+            margin-left: 0px;
+            width: 270px !important;
+        }
+        .filter{
+            margin-left: 275px !important;
+            margin-top: -61px !important;
+        }
+        .error{
+            margin-left: 0px !important;
+        }
+        .client-error{
+            margin-top: -10px;
+            margin-left: 10px;
+        }
+    }
+</style>
+<div class="container-fluid page-body-wrapper">
+    <div class="main-panel">
+        <div class="content-wrapper">
+            <div class="row my-3">
+                <div class="col" style="margin-left: 10px;">
+                    <h4 class="card-title div-title">Delay Request</h4>
+                </div>
+            </div>
+            {% if not request.session.agentId %}
+            <div class="filter-container" style="display: inline-block;margin-top: -83px;margin-left: 815px;">
+                <form action="{% url 'delay-request-history' %}" method="post" id="form-id">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-2">
+                            <select name="type" class="form-control type" required>
+                                <!-- <option disabled selected>Type</option> -->
+                                <!-- <option value="client" {% if get_type == 'client' %} selected {% endif %}>Client</option> -->
+                                <option value="agent" {% if get_type == 'agent' %} selected {% endif %}>Agent</option>
+                            </select>
+                            <p class="card-description error" style="color: red; display:none">
+                                Please select type
+                            </p>
+                        </div>
+                        <div class="col-md-2">
+                            <select name="id" class="form-control filter" id="js-select1" required>
+                                <option disabled selected>Select</option>
+                                {% for data in get_list %}
+                                <option value="{{data.id}}" {% if data.id|slugify == get_id|slugify %} selected {% endif %}>{{data.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-1">
+                            <button type="submit" class="btn-add btn btn-block btn-primary btn-sm font-weight-medium auth-form-btn filter" style="width: 53px; margin-top: -83px; height: 35px;margin-left: 215px;"><i class="fa fa-filter"></i></button>
+                        </div>
+                        <p class="client-error" style="color: red; display:none">
+                            Please select
+                        </p>
+                    </div>
+                </form>
+            </div>
+            {% endif %}
+            <div class="row">
+                <div class="col-lg-12 grid-margin stretch-card">
+                    <div class="card">
+                        <div class="card-body">
+                            <div>
+                            {% if messages %}
+                                {% for message in messages %}
+                                    <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}" role="alert">{{ message }}</div>
+                                {% endfor %}
+                            {% endif %}
+                            </div>
+                            <div class="table-responsive">
+                                {% if get_all_data %}
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            {% if not request.session.agentId %}
+                                            <th>Agent</th>
+                                            {% endif %}
+                                            {% if not request.session.teamLeadertId %}
+                                            <th>Team Leader</th>
+                                            {% endif %}
+                                            <th>Task</th>
+                                            <th>Description</th>
+                                            <th>Status</th>
+                                            <th>Remark</th>
+                                            {% if not request.session.agentId %}
+                                            <th>Action</th>
+                                            {% endif %}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for x in get_all_data %}
+                                        <tr>
+                                            {% if not request.session.agentId %}
+                                            <td class="py-1">
+                                                {{x.agent_id.name}}
+                                            </td>
+                                            {% endif %}
+                                            {% if not request.session.teamLeadertId %}
+                                            <td>
+                                                {{x.team_leader_id.name}}
+                                            </td>
+                                            {% endif %}
+                                            <td>
+                                                {{x.task_id.title}}
+                                            </td>
+                                            <td>
+                                                {{x.remark}}
+                                            </td>
+                                            <td>
+                                                {% if x.status == False %}
+                                                <span class="bullet bullet-dot h-6px w-6px bg-danger position-absolute animation-blink" style="padding-bottom: 7px;
+                                                    padding-right: 7px;    
+                                                    color: white; 
+                                                    font-size: 12px;
+                                                    text-align: center;
+                                                    width: 60px;
+                                                    height: 20px;
+                                                    border-radius: 0 !important;">
+                                                    <p style="font-size: 12px;">Reject</a></p>
+                                                </span>
+                                                {% elif x.status == True %}
+                                                <span class="bullet bullet-dot h-6px w-6px position-absolute" style="padding-bottom: 7px;
+                                                    padding-right: 7px;    
+                                                    color: white; 
+                                                    font-size: 12px;
+                                                    text-align: center;
+                                                    width: 60px;
+                                                    height: 20px;
+                                                    border-radius: 0 !important;
+                                                    background-color: #008000;">
+                                                    <p style="font-size: 12px;">Approve</a></p>
+                                                </span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {{x.status_remark}}
+                                            </td>
+                                            {% if not request.session.agentId %}
+                                            <td>
+                                                <a href="{% url 'change-delay-request-status' %}?id={{x.task_id.id}}" class="text-success btn btn-link px-1" {% if get_id %} target="_blank" {% endif %}>
+                                                    <i class="mdi mdi-grease-pencil text-primary text-success"></i>
+                                                </a>
+                                            </td>
+                                            {% endif %}
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                                {% else %}
+                                <div style="text-align: center;font-weight: 600;">
+                                    No Data Found
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).on('change','#filter-type',function() {
+        var type    = $(this).val();
+        
+        $('.error').hide();
+
+        $.ajax({
+            url:"{% url 'get-filter-type' %}",
+            method:"get",
+            data:{type:type},
+            success:function(data)
+            {  
+                $('#js-select1').empty();
+                $('#js-select1').append(`<option disabled selected>Select</option>`);
+                $.each( data['models_to_return'], function( key1, value ) 
+                {
+                    $('#js-select1').append(`<option value="`+value['id']+`">`+value['name']+`</option>`);
+                });
+            }
+        });
+    });
+
+    $(document).on('click','.select2',function() {
+        var type    = $('.type').val()
+
+        if(type == null)
+        {
+            $('.error').show();
+        }
+        
+    });
+</script>
+
+<script>
+
+    $(document).ready(function() {
+        $('#form-id').on('submit', function(e){
+            var val = $("#js-select1").val();
+            if(!val) {
+                $('.client-error').show()
+                e.preventDefault();
+            }
+        });
+    });
+
+    $(document).on('click','.filter-container',function() {
+        $('.client-error').hide()
+    });
+
+</script>
+
+{% endblock %}

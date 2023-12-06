@@ -1,0 +1,83 @@
+{% extends "admin/layouts/app.html" %}
+{% block content %}
+<div class="container-fluid page-body-wrapper">
+    <div class="main-panel">
+      <div class="content-wrapper">
+        <div>
+            {% if messages %}
+                {% for message in messages %}
+                    {% if message.tags == 'error' %}
+                    <div class="alert {% if message.tags %}alert-danger{% endif %}" role="alert">{{ message }}</div>
+                    {% else %}
+                    <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}" role="alert">{{ message }}</div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        </div>
+        <div class="row">
+            <div class="col-12 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <!-- <a href="{% url 'list-branch' %}">
+                                <div style = "display : inline-block" class="me-2">
+                                    <i class="fa fa-arrow-left card-title"></i>
+                                </div>
+                            </a> -->
+                            <div style = "display : inline-block">
+                                <h4 class="card-title">Send Mail</h4>
+                            </div>
+                        </div>
+                        <form class="forms-sample" action="{% url 'job-wise-email-approved-task-send' %}" id="target" method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <input type="hidden" name="job_id" class="form-control" value="{{job_id}}" required>
+                            <div class="form-group">
+                                <label for="exampleInputName1">Date From</label>
+                                <input type="date" name="date_from" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="exampleInputName1">Date To</label>
+                                <input type="date" name="date_to" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="exampleInputName1">Client</label>
+                                <input type="text" name="client" class="form-control" value="{{client_data.client_id}}" readonly>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-10">
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">Branch</label>
+                                        <select name="branch_id[]" class="form-control js-select2 select_type" multiple="multiple" id="js-select" required>
+                                            {% for x in branch_list %}
+                                            <option value="{{x.id}}">{{x.name}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <p class="card-description formsuccess" style="color: green; display: none;">
+                                        Successfully selected, Please submit your changes
+                                    </p>
+                                </div>
+                                <div class="col-md-2 mb-3">
+                                    <button type="button" name="button" value="draft" class="revoke-btn me-2" id="select_all" style="width: 140px; margin-top: 30px">Select All</button>
+                                </div>  
+                            </div> 
+                            <div>
+                                <button type="submit" class="btn btn-primary btn-submit me-2">Submit</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $('#select_all').click(function() {
+        $('#js-select option').attr("selected","selected");
+        $('.formsuccess').show()
+    });
+    $('#deselectAll').click(function() {
+        $('#js-select1 option').removeAttr("selected");
+    });
+</script>
+{% endblock %}

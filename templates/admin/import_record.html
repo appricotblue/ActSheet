@@ -1,0 +1,48 @@
+{% extends "admin/layouts/app.html" %}
+{% block content %}
+<div class="container-fluid page-body-wrapper">
+    <div class="main-panel">
+      <div class="content-wrapper">
+        <div>
+            {% if messages %}
+                {% for message in messages %}
+                    {% if message.tags == 'error' %}
+                    <div class="alert {% if message.tags %}alert-danger{% endif %}" role="alert">{{ message }}</div>
+                    {% else %}
+                    <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}" role="alert">{{ message }}</div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        </div>
+        <div class="row">
+            <div class="col-12 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <a href="{% url 'list-customer' %}?id={{task_id}}">
+                                <div style = "display : inline-block" class="me-2">
+                                    <i class="fa fa-arrow-left card-title"></i>
+                                </div>
+                            </a>
+                            <div style = "display : inline-block">
+                                <h4 class="card-title">Import Record</h4>
+                            </div>
+                        </div>
+                        <form class="forms-sample" action="{% url 'import' %}" method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label class="mb-2" for="exampleInputName1">CSV File</label>
+                                <input type="file" name="csv_file" required="True" class="form-control">
+                                <input type="hidden" name="task_id" value="{{task_id}}">
+                            </div>
+                            <div>
+                                <button type="submit" class="btn btn-primary btn-submit me-2">Submit</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

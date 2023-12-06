@@ -1,0 +1,212 @@
+{% extends "admin/layouts/app.html" %}
+{% block content %}
+<div class="container-fluid page-body-wrapper">
+    <div class="main-panel">
+      <div class="content-wrapper">
+        <div>
+            {% if messages %}
+                {% for message in messages %}
+                    {% if message.tags == 'error' %}
+                    <div class="alert {% if message.tags %}alert-danger{% endif %}" role="alert">{{ message }}</div>
+                    {% else %}
+                    <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}" role="alert">{{ message }}</div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        </div>
+        <div class="row">
+            <div class="col-12 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <a href="{% url 'list-staff' %}">
+                                <div style = "display : inline-block" class="me-2">
+                                    <i class="fa fa-arrow-left card-title"></i>
+                                </div>
+                            </a>
+                            <div style = "display : inline-block">
+                                <h4 class="card-title">Edit Staff Details</h4>
+                            </div>
+                        </div>
+                        {% for staff in staff_data %}
+                        <form class="forms-sample" action="{% url 'edit-staff' %}?id={{staff.id}}" method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <input type="hidden" id="staff_id" value="{{staff.id}}">
+                            <div class="form-group">
+                                <label for="exampleInputName1">Name</label>
+                                <input type="text" name="name" value="{{staff.name}}" class="form-control" id="exampleInputName1" placeholder="Name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="exampleInputName1">Email</label>
+                                <input type="email" name="email" value="{{staff.email}}" class="form-control" id="email" placeholder="Email" required>
+                                <p class="card-description email-error" style="color: red; display:none">
+                                    Email already exist
+                                </p>
+                            </div>
+                            <div class="form-group">
+                                <label for="exampleInputName1">Phone Number</label>
+                                <input type="text" name="phone" value="{{staff.phone}}" class="form-control" id="exampleInputName1" placeholder="Phone Number" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="exampleInputName1">Designation</label>
+                                <input type="text" name="designation" value="{{staff.designation}}" class="form-control" id="exampleInputName1" placeholder="Designation" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="mb-2" for="exampleInputName1">Image</label>
+                                <p class="mb-3">
+                                    {% if staff.image %}
+                                    <img src="/media/{{staff.image}}" height="auto" data-enlargeable width="100" style="cursor: zoom-in">
+                                    {% endif %}
+                                </p>
+                                <input type="file" name="image" class="form-control" id="exampleInputName1">
+                            </div>
+                            <div class="form-group">
+                                <label for="exampleInputName1">Client</label>
+                                <select name="client_id" class="form-control select-client" id="exampleInputName1" required>
+                                    <option selected disabled>Select client</option>
+                                    {% for x in client_list %}
+                                    <option value="{{x.id}}" {% if x.id == staff.client_id.id %} selected="selected" {% endif %}>{{x.name}}</option>
+                                    {% endfor %}
+                                </select>
+                                <p class="card-description client-error" style="color: red; display:none">
+                                    Please select client
+                                </p>
+                            </div>
+                            <div class="form-group">
+                                <label for="exampleInputName1">Branch</label>
+                                <select name="branch_id" class="form-control branch_id" id="exampleInputName1" required>
+                                    <option disabled>Select branch</option>
+                                    {% for x in branch_list %}
+                                    <option value="{{x.id}}" {% if x.id == staff.branch_id.id %} selected="selected" {% endif %}>{{x.name}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="exampleInputName1">Shift</label>
+                                <select name="shift_id" class="form-control" id="exampleInputName1" required>
+                                    <option selected disabled>Select Shift</option>
+                                    {% for x in shift_list %}
+                                    <option value="{{x.id}}" {% if x.id == staff.shift_id.id %} selected="selected" {% endif %}>{{x.from_time}} - {{x.to_time}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="exampleInputName1">Total Hours</label>
+                                <input type="number" name="total_hrs" value="{{staff.total_hrs}}" class="form-control" id="exampleInputName1" min="1" placeholder="Total Hours" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="exampleInputName1">Required Hours</label>
+                                <input type="number" name="required_hrs" value="{{staff.required_hrs}}" class="form-control" id="exampleInputName1" min="1" placeholder="Required Hours" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="exampleInputName1">Max Break Time</label>
+                                <input type="number" name="max_break_time" value="{{staff.max_break_time}}" class="form-control" id="exampleInputName1" min="1" placeholder="Max Break Time" required>
+                            </div>
+                            <div>
+                                <button type="submit" class="btn btn-primary btn-submit me-2">Submit</button>
+                            </div>
+                        </form>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $('img[data-enlargeable]').addClass('img-enlargeable').click(function() {
+    var src = $(this).attr('src');
+    var modal;
+
+    function removeModal() {
+        modal.remove();
+        $('body').off('keyup.modal-close');
+    }
+    modal = $('<div>').css({
+        background: 'RGBA(0,0,0,.5) url(' + src + ') no-repeat center',
+        backgroundSize: 'contain',
+        width: '100%',
+        height: '100%',
+        position: 'fixed',
+        zIndex: '10000',
+        top: '0',
+        left: '0',
+        cursor: 'zoom-out'
+    }).click(function() {
+        removeModal();
+    }).appendTo('body');
+    //handling ESC
+    $('body').on('keyup.modal-close', function(e) {
+        if (e.key === 'Escape') {
+        removeModal();
+        }
+    });
+    });
+</script>
+<script>
+    $(document).on('change','.select-client',function() {
+
+        var client_id   = $(this).val();
+
+        $('.client-error').hide();
+
+        $.ajax({
+            url:"{% url 'get-client-branch' %}",
+            method:"get",
+            data:{client_id:client_id},
+            success:function(data)
+            {  
+                $('.branch_id').empty();
+
+                $('.branch_id').append(`<option value="" selected disabled>Select branch</option>`);
+                $.each( data['models_to_return'], function( key1, value ) 
+                {
+                    $('.branch_id').append(`<option value="`+value['id']+`">`+value['name']+`</option>`);
+                });
+            }
+        });
+    });
+
+    $(document).on('click','.branch_id',function() {
+        var client_id    = $('.select-client').val()
+
+        if(client_id == null)
+        {
+            $('.client-error').show();
+        }
+        
+    });
+</script>
+<script>
+    var submit  = true
+    $(document).on('change','#email',function() {
+        var email       = $(this).val();
+        var staff_id    = $('#staff_id').val();
+
+        $('.email-error').hide();
+        submit  = true
+        $.ajax({
+            url:"{% url 'check-staff-email' %}",
+            method:"get",
+            data:{email:email,id:staff_id},
+            success:function(data)
+            {  
+                if(data == true)
+                {
+                    $('.email-error').show();
+                    submit = false
+                }
+            }
+        });
+    });
+
+    $(".btn-submit").on("click", function (e) {
+        if(submit == false)
+        {
+            e.preventDefault();
+            $("html, body").animate({ scrollTop: 0 }, "slow");
+            return;
+        }
+    });
+</script>
+{% endblock %}

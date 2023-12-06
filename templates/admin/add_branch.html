@@ -1,0 +1,73 @@
+{% extends "admin/layouts/app.html" %}
+{% block content %}
+<div class="container-fluid page-body-wrapper">
+    <div class="main-panel">
+      <div class="content-wrapper">
+        <div>
+            {% if messages %}
+                {% for message in messages %}
+                    {% if message.tags == 'error' %}
+                    <div class="alert {% if message.tags %}alert-danger{% endif %}" role="alert">{{ message }}</div>
+                    {% else %}
+                    <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}" role="alert">{{ message }}</div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        </div>
+        <div class="row">
+            <div class="col-12 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <a href="{% url 'list-branch' %}">
+                                <div style = "display : inline-block" class="me-2">
+                                    <i class="fa fa-arrow-left card-title"></i>
+                                </div>
+                            </a>
+                            <div style = "display : inline-block">
+                                <h4 class="card-title">Add Branch</h4>
+                            </div>
+                        </div>
+                        <form class="forms-sample" action="{% url 'add-branch' %}" id="target" method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label for="exampleInputName1">Name</label>
+                                <input type="text" name="name" class="form-control" id="exampleInputName1" placeholder="Name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="exampleInputName1">Email</label>
+                                <input type="email" name="email" class="form-control" id="exampleInputName1" placeholder="Email" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="exampleInputName1">CC (Enter a comma separated data like abcd@gmail.com,gbf@gmail.com)</label>
+                                <textarea  class="form-control" name="cc" rows="4" cols="50" placeholder="CC"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="exampleInputName1">Client</label>
+                                <select name="client_id" class="form-control" id="exampleInputName1" required>
+                                    <option selected disabled>Select client</option>
+                                    {% for x in client_list %}
+                                    <option value="{{x.id}}">{{x.name}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group" id="layout_div">
+                                <label for="exampleInputName1">Layout</label>
+                                <input type="file" name="image" class="form-control" id="layout">
+                            </div>
+                            <div class="form-group" id="upload_div">
+                                <label for="exampleInputName1">Upload File</label>
+                                <input type="file" name="image1" class="form-control" id="upload_image">
+                            </div>
+                            <div>
+                                <button type="submit" class="btn btn-primary btn-submit me-2">Submit</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

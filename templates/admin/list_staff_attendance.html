@@ -1,0 +1,492 @@
+{% extends "admin/layouts/app.html" %}
+{% block content %}
+<div class="container-fluid page-body-wrapper">
+    <div class="main-panel">
+        <div class="content-wrapper">
+            
+            <div class="row my-3">
+                <div class="col" style="margin-left: 10px;">
+                    <h4 class="card-title div-title">Attendance</h4>
+                </div>
+                <div class="search-container" style="display: inline-block;">
+                    <form action="{% url 'search-staff-attendance' %}" method="post">
+                        {% csrf_token %}
+                        <input type="text" placeholder="Search.." name="search" value="{{search_key}}" class="form-control search-item" required style="width :240px; width: 240px;margin-top: -30px;margin-left: 115px;height: 35px;">
+                        <button type="submit" class="btn-add btn btn-block btn-primary btn-sm font-weight-medium auth-form-btn search" style="width: 53px; margin-top: -49px; margin-left: 360px; height: 35px;"><i class="fa fa-search"></i></button>
+                    </form>
+                </div>
+                {% if request.session.adminId %}
+                <div class="col" style="text-align: right;">
+                    <ul class="navbar-nav navbar-nav-right">
+                        <li class="nav-item nav-profile dropdown">
+                            <a class="nav-link dropdown-toggle revoke-btn" href="#" data-bs-toggle="dropdown" id="profileDropdown">
+                                Export
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="profileDropdown">      
+                                <a class="dropdown-item" id="export_report" href="#">
+                                    <i class="mdi mdi-export text-primary"></i>
+                                    CSV
+                                </a>
+                                <a class="dropdown-item exportToExcel" href="#">
+                                    <i class="mdi mdi-export text-primary"></i>
+                                    Excel
+                                </a>
+                                <a class="dropdown-item exportToPDF" onclick="exportPdf()" href="#">
+                                    <i class="mdi mdi-export text-primary"></i>
+                                    PDF
+                                </a>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                
+                <form class="forms-sample mt-4" action="{% url 'list-attendance' %}" method="post">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label for="exampleInputName1">Date From </label>
+                                <input type="date" name="date_from" class="form-control" id="exampleInputName1" value="{{date_from}}" style="height: 33px;" required>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label for="exampleInputName1">Date To</label>
+                                <input type="date" name="date_to" class="form-control" id="exampleInputName1" value="{{date_to}}" style="height: 33px;" required>
+                            </div>
+                        </div>
+                        <div class="col-md-2 select-based-type">
+                            <div class="form-group">
+                                <label for="exampleInputName1">Client</label>
+                                <select name="client_id" class="form-control all_client" style="height: 33px;" required>
+                                    <option value="" disabled selected>Select client</option>
+                                    {% for x in client_list %}
+                                    <option value="{{x.id}}" {% if x.id|slugify == client_id|slugify %} selected {% endif %}>{{x.name}}</option>
+                                    {% endfor %}
+                                </select>
+                                <p class="card-description client_error mt-2" style="color: red; display:none">
+                                    Please select client
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-2 select-based-type">
+                            <div class="form-group">
+                                <label for="exampleInputName1">Branch</label>
+                                <select name="branch_id" class="form-control all_branch" style="height: 33px;" required>
+                                    <option value="" disabled selected>Select branch</option>
+                                    {% for x in branch %}
+                                    <option value="{{x.id}}" {% if x.id|slugify == branch_id|slugify %} selected {% endif %}>{{x.name}}</option>
+                                    {% endfor %}
+                                </select>
+                                <p class="card-description error mt-2" style="color: red; display:none">
+                                    Please select branch
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-2 select-based-type">
+                            <div class="form-group">
+                                <label for="exampleInputName1">Staff</label>
+                                <select name="staff_id" class="form-control all_staff" style="height: 33px;" required>
+                                    <option value="" disabled selected>Select staff</option>
+                                    {% for x in staff_list %}
+                                    <option value="{{x.id}}" {% if x.id|slugify == staff_id|slugify %} selected {% endif %}>{{x.name}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <button type="submit" class="btn-add btn btn-block btn-primary btn-sm font-weight-medium auth-form-btn generate-button" style="margin-top: 30px;">Generate</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                {% endif %}
+                <div class="col" style="margin-left: 10px;">
+                    <a href="#" style="color: #004E8F;" class="sort-break">Sort Break Hours <i class="fa fa-sort-down"></i></a>
+                </div>
+                <div class="col" style="text-align: right;">
+                    <a href="{% url 'add-attendance' %}" class="btn-add btn btn-block btn-primary btn-sm font-weight-medium auth-form-btn">+ ADD NEW</a>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12 grid-margin stretch-card">
+                    <div class="card">
+                        <div class="card-body">
+                            <div>
+                            {% if messages %}
+                                {% for message in messages %}
+                                    <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}" role="alert">{{ message }}</div>
+                                {% endfor %}
+                            {% endif %}
+                            </div>
+                            
+                            <div class="table-responsive" id="myTable">
+                                {% if staff_attendance_list %}
+                                <table class="table table-bordered table2excel myTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Client</th>
+                                            <th>Name</th>
+                                            <th>Check In</th>
+                                            <th>Check Out</th>
+                                            <th>Official Break Hrs</th>
+                                            <th>Un Official Break Hrs</th>
+                                            <th>Total Break Hrs</th>
+                                            <th>Total Work Hrs</th>
+                                            <th>OT</th>
+                                            <th>UT</th>
+                                            <th class="noExl">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for x in staff_attendance_list %}
+                                        <tr style="height: 50px;">
+                                            <td>
+                                                {{ x.date|date:"M d Y" }}
+                                            </td>
+                                            <td>
+                                                {{ x.client_id.client_id }}
+                                            </td>
+                                            <td>
+                                                {{x.staff_id.name}}
+                                            </td>
+                                            <td>
+                                                {{x.in_time}}
+                                            </td>
+                                            <td>
+                                                {{x.out_time}}
+                                            </td>
+                                            <td>
+                                                {{ x.official_break }}
+                                            </td>
+                                            <td>
+                                                {{ x.un_official_break }}
+                                            </td>
+                                            <td>
+                                                {{ x.break_hours }}
+                                            </td>
+                                            <td>
+                                                {{ x.work_hours }}
+                                            </td>
+                                            <td>
+                                                {{ x.over_time }}
+                                            </td>
+                                            <td>
+                                                {{ x.under_time }}
+                                            </td>
+                                            <td class="noExl">
+                                                <a href="{% url 'view-attendance' %}?id={{x.id}}" {% if search_key or date_from %} target="_blank" {% endif %}>
+                                                    <i class="mdi mdi-eye text-primary text-success me-2"></i>
+                                                </a>
+                                                {% if request.session.agentId and x.submit == False %}
+                                                <a href="{% url 'edit-attendance' %}?id={{x.id}}" {% if search_key or date_from %} target="_blank" {% endif %}>
+                                                    <i class="mdi mdi-grease-pencil text-primary text-success me-2"></i>
+                                                </a>
+                                                <a href="#" class="delete-btn" id="{{x.id}}" onclick="document.getElementById('id01').style.display='block'">
+                                                    <i class="mdi mdi-delete text-primary text-success me-2"></i>
+                                                </a>
+                                                {% elif not request.session.agentId %}
+                                                <a href="{% url 'edit-attendance' %}?id={{x.id}}" {% if search_key or date_from %} target="_blank" {% endif %}>
+                                                    <i class="mdi mdi-grease-pencil text-primary text-success me-2"></i>
+                                                </a>
+                                                <a href="#" class="delete-btn" id="{{x.id}}" onclick="document.getElementById('id01').style.display='block'">
+                                                    <i class="mdi mdi-delete text-primary text-success me-2"></i>
+                                                </a>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                                {% else %}
+                                <div style="text-align: center; font-weight: 600;">
+                                    No Data Found
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).on('click','.all_branch',function() {
+        var client_id   = $('.all_client').val();
+
+        if(client_id == null)
+        {
+            $('.client_error').show();
+        } 
+    });
+
+    
+    $(document).on('change','.all_client',function() {
+        var client_id   = $(this).val();
+
+        $('.client_error').hide();
+
+        $.ajax({
+            url:"{% url 'get-client-branch' %}",
+            method:"get",
+            data:{client_id:client_id},
+            success:function(data)
+            {  
+                $('.all_branch').empty();
+                $('.all_staff').empty();
+                $('.all_branch').append(`<option value="" disabled selected>Select branch</option>`);
+                $.each( data['models_to_return'], function( key1, value ) 
+                {
+                    $('.all_branch').append(`<option value="`+value['id']+`">`+value['name']+`</option>`);
+                });
+            }
+        });
+    });
+
+
+
+    $(document).on('change','.all_branch',function() {
+        var branch_id   = $(this).val();
+
+        $('.error').hide();
+
+        $.ajax({
+            url:"{% url 'get-branch-staff' %}",
+            method:"get",
+            data:{branch_id:branch_id},
+            success:function(data)
+            {  
+                $('.all_staff').empty();
+                $('.all_staff').append(`<option value="" disabled selected>Select staff</option>`);
+                $.each( data['models_to_return'], function( key1, value ) 
+                {
+                    $('.all_staff').append(`<option value="`+value['id']+`">`+value['name']+`</option>`);
+                });
+            }
+        });
+    });
+
+    $(document).on('click','.all_staff',function() {
+        var branch_id   = $('.all_branch').val();
+
+        if(branch_id == null)
+        {
+            $('.error').show();
+        }
+    });
+</script>
+
+
+<!-- -----------------------CSV----------------- -->
+<script>
+    function download_csv(csv, filename) {
+    var csvFile;
+    var downloadLink;
+
+    // CSV FILE
+    csvFile = new Blob([csv], {type: "text/csv"});
+
+    // Download link
+    downloadLink = document.createElement("a");
+
+    // File name
+    downloadLink.download = filename;
+
+    // We have to create a link to the file
+    downloadLink.href = window.URL.createObjectURL(csvFile);
+
+    // Make sure that the link is not displayed
+    downloadLink.style.display = "none";
+
+    // Add the link to your DOM
+    document.body.appendChild(downloadLink);
+
+    // Lanzamos
+    downloadLink.click();
+}
+
+function export_table_to_csv(html, filename) {
+	var csv = [];
+	var rows = document.querySelectorAll("table tr");
+	
+    for (var i = 0; i < rows.length; i++) {
+		var row = [], cols = rows[i].querySelectorAll("td, th");
+		
+        for (var j = 0; j < cols.length; j++) 
+            row.push(cols[j].innerText);
+        
+		csv.push(row.join(","));		
+	}
+
+    // Download CSV
+    download_csv(csv.join("\n"), filename);
+}
+
+document.querySelector("#export_report").addEventListener("click", function () {
+    var html = document.querySelector("table").outerHTML;
+	export_table_to_csv(html, "attendance.csv");
+});
+</script>
+<!-- -----------------------CSV----------------- -->
+<!-- -----------------------Excel----------------- -->
+<script>
+    $(function() {
+        $(".exportToExcel").click(function(e){
+            var table = $('.table2excel');
+            $('.noExl').hide();
+            if(table && table.length){
+                var preserveColors = (table.hasClass('table2excel_with_colors') ? true : false);
+                $(table).table2excel({
+                    exclude: ".noExl",
+                    name: "Excel Document Name",
+                    filename: "attendance.xls",
+                    fileext: ".xls",
+                    exclude_img: true,
+                    exclude_links: true,
+                    exclude_inputs: true,
+                    preserveColors: preserveColors
+                });
+            }
+        });
+        
+    });
+</script>
+<!-- -----------------------Excel----------------- -->
+<!-- -----------------------pdf----------------- -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.2/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.2/vfs_fonts.js"></script>
+<script type="text/javascript">
+   function exportPdf() {
+        var docDefinition = {
+            content: [],
+            styles: {
+            header: {
+                fontSize: 9,
+                bold: true
+            },
+            tableExample: {
+                margin: 0,
+                fontSize: 9,
+                
+            },
+            }
+        };
+        // Get all tables with the class name "myTable"
+        var tables = $(".myTable");
+
+        // Loop through each table and add it to the PDF document
+        for (var i = 0; i < tables.length; i++) {
+            var table = tables[i];
+
+            // Get the table data and create the table body
+            var tableData = [];
+            var headers = [];
+            $(table)
+            .find("thead th")
+            .each(function () {
+                headers.push({ text: $(this).text(), style: "header" });
+            });
+            tableData.push(headers);
+            $(table)
+            .find("tbody tr")
+            .each(function () {
+                var rowData = [];
+                $(this)
+                .find("td")
+                .each(function () {
+                    rowData.push({ text: $(this).text().trim(), alignment: "center" });
+                });
+                tableData.push(rowData);
+            });
+            // Add the table to the PDF document
+            // var table_title = $('#tb-head'+(i + 1)).val();
+            // docDefinition.content.push({ text: table_title, style: "header" });
+            docDefinition.content.push({
+                style: "tableExample",
+                table: {
+                    headerRows: 1,
+                    widths: Array(headers.length).fill("auto"),
+                    
+                    body: tableData,
+                },
+            });
+            docDefinition.content[0].table.body[0].height = 10;
+        }
+
+        // Create the PDF document and download it
+        var pdfDoc = pdfMake.createPdf(docDefinition);
+        pdfDoc.download("attendance.pdf");
+}
+
+</script>
+<!-- -----------------------pdf----------------- -->
+
+<!-- -----------------Delete model popup------------------ -->
+<div id="id01" class="modal">
+    <span onclick="document.getElementById('id01').style.display='none'" class="close" title="Close Modal">×</span>
+    <form class="modal-content" action="{% url 'delete-attendance' %}" method="get">
+      <div class="container">
+        <h1 class="mt-3">Delete Data</h1>
+        <p class="mt-3">Are you sure you want to delete?</p>
+        <input type="hidden" name="id" id="delete-id">
+        <div class="clearfix">
+          <button type="button" onclick="document.getElementById('id01').style.display='none'" class="cancelbtn">Cancel</button>
+          <button type="submit" class="deletebtn">Delete</button>
+        </div>
+      </div>
+    </form>
+</div>
+
+
+<script>
+    // Get the modal
+    var modal = document.getElementById('id01');
+    
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function(event) {
+    if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+
+$(document).ready(function() {
+    $('.delete-btn').on('click', function(e){
+        var id  = $(this).attr('id');
+        $('#delete-id').val(id);
+    });
+});
+</script>
+<!-- -----------------Delete model popup------------------ -->
+
+<!-- -----------------Sort Break------------------ -->
+<script>
+    $(document).on('click','.sort-break',function() {
+        // Get the table rows that contain Time Field 1
+        var n= 8;
+        var rows = $('#myTable tbody tr td:nth-child(' + n + ')').parent('tr');
+
+        rows.sort(function(a, b) {
+            var timeA = $(a).find('td:nth-child(' + n + ')').text();
+            var timeB = $(b).find('td:nth-child(' + n + ')').text();
+            
+            // Convert time strings to 24-hour format
+            timeA = timeA.replace(' hour', ''); // Remove " hour" from the string
+            timeA = timeA.split(':'); // Split the string into hours and minutes
+            timeA = parseInt(timeA[0]) + (timeA[1] / 60); // Convert to decimal hours
+            
+            timeB = timeB.replace(' hour', ''); // Remove " hour" from the string
+            timeB = timeB.split(':'); // Split the string into hours and minutes
+            timeB = parseInt(timeB[0]) + (timeB[1] / 60); // Convert to decimal hours
+            
+            return (timeA < timeB) ? 1 : -1;
+        });
+
+        // Append the sorted rows back to the table
+        $('#myTable tbody').append(rows);
+    });
+</script>
+<!-- -----------------Sort Break------------------ -->
+{% endblock %}

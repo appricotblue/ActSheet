@@ -1,0 +1,421 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>ActSheet</title>
+    <link rel="stylesheet" href="/static/admin/vendors/mdi/css/materialdesignicons.min.css">
+    <link rel="stylesheet" href="/static/admin/vendors/base/vendor.bundle.base.css">
+    <link rel="stylesheet" href="/static/admin/vendors/select2/select2.min.css">
+    <link rel="stylesheet" href="/static/admin/vendors/select2-bootstrap-theme/select2-bootstrap.min.css">
+    <link rel="stylesheet" href="/static/admin/css/style.css">
+    <link rel="shortcut icon" href="/static/admin/images/ActsheetIcon.png" />
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+
+    <script src="/static/admin/js/jquery-1.9.1.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="/static/admin/css/actstyle.css">
+    {% if request.session.agentId %}
+    <style>
+        @media (min-width: 1200px){
+            .container, .container-sm, .container-md, .container-lg, .container-xl {
+                max-width: 530px;
+            }
+        }
+    </style>
+    {% elif request.session.clientId %}
+    <style>
+        @media (min-width: 1200px){
+            .container, .container-sm, .container-md, .container-lg, .container-xl {
+                max-width: 650px;
+            }
+        }
+    </style>
+    {% endif %}
+</head>
+<body>
+    <div class="container-scroller">
+        <div class="horizontal-menu">
+            <nav class="navbar top-navbar col-lg-12 col-12 p-0">
+                <div class="container-fluid">
+                    <div class="navbar-menu-wrapper d-flex align-items-center justify-content-between">
+                        <ul class="navbar-nav navbar-nav-left">
+                            <li class="nav-item ms-0 me-5 d-lg-flex d-none">
+                                <a href="#" class="nav-link horizontal-nav-left-menu"><i class="mdi mdi-format-list-bulleted"></i></a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link count-indicator dropdown-toggle d-flex align-items-center justify-content-center" id="notificationDropdown" href="#" data-bs-toggle="dropdown">
+                                    <i class="mdi mdi-bell mx-0"></i>
+                                    {% if notification_count != 0 %}
+                                    <span class="count bg-success">{{notification_count}}</span>
+                                    {% endif %}
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-right navbar-dropdown preview-list" aria-labelledby="notificationDropdown">
+                                    <p class="mb-0 font-weight-normal float-left dropdown-header">Notifications 
+                                        {% if notification_count != 0 %}
+                                        <a href="{% url 'notification-seen' %}">Clear</a>
+                                        {% endif %}
+                                    </p>
+                                    {% for notification in get_notification %}
+                                    <a class="dropdown-item preview-item">
+                                        <div class="preview-thumbnail">
+                                            <div class="preview-icon bg-success">
+                                            <i class="mdi mdi-information mx-0"></i>
+                                            </div>
+                                        </div>
+                                        <div class="preview-item-content">
+                                            <h6 class="preview-subject font-weight-normal">{{notification.message}}</h6>
+                                            <p class="font-weight-light small-text mb-0 text-muted">
+                                             
+                                            </p>
+                                        </div>
+                                    </a>
+                                    {% endfor %}
+                                </div>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link count-indicator" href="{% url 'client-message' %}">
+                                    <i class="mdi mdi-message-reply-text"></i>
+                                    {% if unread_message != 0%}
+                                    <span class="count bg-primary">{{unread_message}}</span>
+                                    {% endif %}
+                                </a>
+                            </li>
+                            {% if not request.session.agentId %}
+                            <li class="nav-item dropdown mb-2">
+                                <a href="{% url 'list-complaint-tickets' %}" class="nav-link count-indicator ">
+                                    <i class="fa fa-comments"></i>
+                                    {% if not request.session.clientId %}
+                                        {% if complaint_data != 0%}
+                                        <span class="count bg-primary">{{complaint_data}}</span>
+                                        {% endif %}
+                                    {% endif %}
+                                </a>
+                            </li>
+                            {% endif %}
+                            {% if not request.session.clientId %}
+                            <li class="nav-item dropdown">
+                                <a class="nav-link count-indicator dropdown-toggle d-flex align-items-center justify-content-center" id="notificationDropdown" href="#" data-bs-toggle="dropdown">
+                                    <i class="fa fa-history"></i>
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-right navbar-dropdown preview-list" aria-labelledby="notificationDropdown">
+                                    <p class="mb-0 font-weight-normal float-left dropdown-header">History</p>
+                                    <a class="dropdown-item preview-item" href="{% url 'delay-request-history' %}">
+                                        <div class="preview-thumbnail">
+                                            <div class="preview-icon" style="background-color: #D3F0FC;">
+                                            <i class="fa fa-history mx-0"></i>
+                                            </div>
+                                        </div>
+                                        <div class="preview-item-content">
+                                            <h6 class="preview-subject font-weight-normal">Delay Request</h6>
+                                            <p class="font-weight-light small-text mb-0 text-muted">
+                                            </p>
+                                        </div>
+                                    </a>
+                                    <a class="dropdown-item preview-item" href="{% url 'edit-request-history' %}">
+                                        <div class="preview-thumbnail">
+                                            <div class="preview-icon" style="background-color: #D3F0FC;">
+                                            <i class="fa fa-history mx-0"></i>
+                                            </div>
+                                        </div>
+                                        <div class="preview-item-content">
+                                            <h6 class="preview-subject font-weight-normal">Edit Request</h6>
+                                            <p class="font-weight-light small-text mb-0 text-muted">
+                                            </p>
+                                        </div>
+                                    </a>
+                                </div>
+                            </li>
+                            {% endif %}
+                        </ul>
+                        <div class="text-center navbar-brand-wrapper d-flex align-items-center justify-content-center">
+                            <a class="navbar-brand brand-logo" href="#"><img src="/static/admin/images/ActSheet.png" alt="logo"/></a>
+                            <a class="navbar-brand brand-logo-mini" href="#"><img src="/static/admin/images/ActsheetIcon.png" alt="logo" style="width: unset;"/></a>
+                        </div>
+                        <ul class="navbar-nav navbar-nav-right">
+                            <li class="nav-item dropdown d-lg-flex d-none">
+                                {% if request.session.agentId %}
+                                <div style="display: inline-block;" class="me-5">
+                                    <label for="exampleInputName1" class="me-3" style="color: #001737;">{% if checkin_data %}{{checkin_data}}{% else %} Check Out{% endif %}</label>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox"  id="checkIn" {% if checkin_data == 'Check In' %}checked {% endif %}>
+                                        <span class="toggle-slider round"></span>
+                                    </label> 
+                                </div>
+                                {% endif %}
+                            </li>
+                            <li class="nav-item nav-profile dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" id="profileDropdown">
+                                    <span class="nav-profile-name">
+                                        {{name}}
+                                    </span>
+                                    <span class="online-status"></span>
+                                    <img src="/static/admin/images/images.png" alt="profile"/>
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="profileDropdown">
+                                    <!-- <a class="dropdown-item">
+                                        <i class="mdi mdi-settings text-primary"></i>
+                                        Settings
+                                    </a> -->
+                                    {% if request.session.adminId %}
+                                    <a class="dropdown-item" href="{% url 'admin-logout' %}">
+                                        <i class="mdi mdi-logout text-primary"></i>
+                                        Logout
+                                    </a>
+                                    {% elif request.session.clientId %}
+                                    <a class="dropdown-item" href="{% url 'client-logout' %}">
+                                        <i class="mdi mdi-logout text-primary"></i>
+                                        Logout
+                                    </a>
+                                    {% else %}
+                                    <a class="dropdown-item" href="{% url 'user-logout' %}">
+                                        <i class="mdi mdi-logout text-primary"></i>
+                                        Logout
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </li>
+                        </ul>
+                        <button class="navbar-toggler navbar-toggler-right d-lg-none align-self-center" type="button" data-toggle="horizontal-menu-toggle">
+                            <span class="mdi mdi-menu"></span>
+                        </button>
+                    </div>
+                </div>
+            </nav>
+            <nav class="bottom-navbar">
+                <div class="container">
+                    <ul class="nav page-navigation">
+                    
+                        {% if request.session.agentId %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'user-login' %}">
+                            <i class="mdi mdi-file-document-box menu-icon"></i>
+                            <span class="menu-title">Dashboard</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="mdi mdi-codepen menu-icon"></i>
+                                <span class="menu-title">Task</span>
+                                <i class="menu-arrow"></i>
+                            </a>
+                            <div class="submenu">
+                                <ul class="submenu-item">
+                                    <li class="nav-item"><a class="nav-link" href="{% url 'list-task' %}">Task</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="{% url 'list-approved-task' %}">Task Approved</a></li>
+                                </ul>
+                            </div>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="mdi mdi-codepen menu-icon"></i>
+                                <span class="menu-title">Attendance</span>
+                                <i class="menu-arrow"></i>
+                            </a>
+                            <div class="submenu">
+                                <ul class="submenu-item">
+                                    <li class="nav-item"><a class="nav-link" href="{% url 'list-attendance' %}">Staff Attendance</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="{% url 'list-approve-attendance' %}">Approved staff Attendance</a></li>
+                                </ul>
+                            </div>
+                        </li>
+                        {% elif request.session.teamLeadertId %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'team-leader-dashboard' %}">
+                            <i class="mdi mdi-file-document-box menu-icon"></i>
+                            <span class="menu-title">Dashboard</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'report' %}" class="nav-link">
+                                <i class="mdi mdi-codepen menu-icon"></i>
+                                <span class="menu-title">Reports</span>
+                                <i class="menu-arrow"></i>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="mdi mdi-codepen menu-icon"></i>
+                                <span class="menu-title">Job</span>
+                                <i class="menu-arrow"></i>
+                            </a>
+                            <div class="submenu">
+                                <ul class="submenu-item">
+                                    <li class="nav-item"><a class="nav-link" href="{% url 'list-jobs' %}">Job</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="{% url 'list-task' %}">Task</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="{% url 'task-submitted' %}">Task Submitted</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="{% url 'list-approved-task' %}">Task Approved</a></li>
+                                </ul>
+                            </div>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="mdi mdi-codepen menu-icon"></i>
+                                <span class="menu-title">Attendance</span>
+                                <i class="menu-arrow"></i>
+                            </a>
+                            <div class="submenu">
+                                <ul class="submenu-item">
+                                    <li class="nav-item"><a class="nav-link" href="{% url 'list-attendance' %}">Staff Attendance</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="{% url 'list-approve-attendance' %}">Approved staff Attendance</a></li>
+                                </ul>
+                            </div>
+                        </li>
+                        {% elif request.session.clientId %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'client-dashboard' %}">
+                            <i class="mdi mdi-file-document-box menu-icon"></i>
+                            <span class="menu-title">Dashboard</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'client-activities' %}">
+                            <i class="mdi mdi-codepen menu-icon"></i>
+                            <span class="menu-title">Activities</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'report' %}" class="nav-link">
+                                <i class="mdi mdi-codepen menu-icon"></i>
+                                <span class="menu-title">Reports</span>
+                                <i class="menu-arrow"></i>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'attendance' %}">
+                            <i class="mdi mdi-codepen menu-icon"></i>
+                            <span class="menu-title">Staff Attendance</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'task' %}">
+                            <i class="mdi mdi-codepen menu-icon"></i>
+                            <span class="menu-title">Task</span>
+                            </a>
+                        </li>
+                        {% elif request.session.adminId %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'admin-login' %}">
+                            <i class="mdi mdi-file-document-box menu-icon"></i>
+                            <span class="menu-title">Dashboard</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'report' %}" class="nav-link">
+                                <i class="mdi mdi-codepen menu-icon"></i>
+                                <span class="menu-title">Reports</span>
+                                <i class="menu-arrow"></i>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="mdi mdi-codepen menu-icon"></i>
+                                <span class="menu-title">Client</span>
+                                <i class="menu-arrow"></i>
+                            </a>
+                            <div class="submenu">
+                                <ul class="submenu-item">
+                                    <li class="nav-item"><a class="nav-link" href="{% url 'list-client' %}">Client</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="{% url 'list-branch' %}">Branch</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="{% url 'list-shift' %}">Shift</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="{% url 'list-staff' %}">Staff</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="{% url 'list-zones' %}">Zone</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="{% url 'list-window-zones' %}">Window Zone</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="{% url 'list-attendance' %}">Staff Attendance</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="{% url 'list-approve-attendance' %}">Approved staff Attendance</a></li>
+                                </ul>
+                            </div>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="mdi mdi-codepen menu-icon"></i>
+                                <span class="menu-title">Job</span>
+                                <i class="menu-arrow"></i>
+                            </a>
+                            <div class="submenu">
+                                <ul class="submenu-item">
+                                    <li class="nav-item"><a class="nav-link" href="{% url 'list-jobs' %}">Job</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="{% url 'list-task' %}">Task</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="{% url 'task-submitted' %}">Task Submitted</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="{% url 'list-approved-task' %}">Task Approved</a></li>
+                                </ul>
+                            </div>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'list-team-leader' %}" class="nav-link">
+                                <i class="mdi mdi-codepen menu-icon"></i>
+                                <span class="menu-title">Team Leader</span>
+                                <i class="menu-arrow"></i>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'list-agent' %}" class="nav-link">
+                                <i class="mdi mdi-codepen menu-icon"></i>
+                                <span class="menu-title">Agent</span>
+                                <i class="menu-arrow"></i>
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </nav>
+        </div>
+
+        {% block content %}
+        {% endblock %}
+
+    </div>
+    <footer class="footer">
+        <div class="footer-wrap">
+            <div class="d-sm-flex justify-content-center justify-content-sm-between">
+                <span class="text-muted text-center text-sm-left d-block d-sm-inline-block">Copyright © 2023. All rights reserved</span>
+                <span class="float-none float-sm-right d-block mt-1 mt-sm-0 text-center">
+                    <!-- Only the best <a href="https://www.bootstrapdash.com/" target="_blank"> Bootstrap dashboard </a> templates -->
+                </span>
+            </div>
+        </div>
+    </footer>
+    <script src="/static/admin/vendors/base/vendor.bundle.base.js"></script>
+    <script src="/static/admin/js/template.js"></script>
+    <script src="/static/admin/vendors/chart.js/Chart.min.js"></script>
+    <script src="/static/admin/vendors/progressbar.js/progressbar.min.js"></script>
+    <script src="/static/admin/vendors/chartjs-plugin-datalabels/chartjs-plugin-datalabels.js"></script>
+    <script src="/static/admin/vendors/justgage/raphael-2.1.4.min.js"></script>
+    <script src="/static/admin/vendors/justgage/justgage.js"></script>
+    <script src="/static/admin/js/jquery.cookie.js" type="text/javascript"></script>
+    <script src="/static/admin/js/dashboard.js"></script>
+    <script src="/static/admin/vendors/select2/select2.min.js"></script>
+    <script src="/static/admin/js/select2.js"></script>
+    <script src="/static/admin/js/excel/dist/jquery.table2excel.js"></script>
+    <script>
+        $(document).ready(function() {
+            $(".alert").fadeTo(8000, 1000).slideUp(900, function(){
+                $(".alert").slideUp(900);
+            });
+        });
+    </script>
+    <script>
+        $('#checkIn').change(function(){
+            if($(this).is(":checked")) {
+                var status = 'Check In';
+            } 
+            else
+            {
+                var status = 'Check Out';
+            }
+
+            $.ajax({
+                url:"{% url 'agent-attendance' %}",
+                method:"get",
+                data:{status:status},
+                success:function(data)
+                {  
+                    location.reload(true);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

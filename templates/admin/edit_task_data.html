@@ -1,0 +1,122 @@
+{% extends "admin/layouts/app.html" %}
+{% block content %}
+<div class="container-fluid page-body-wrapper">
+    <div class="main-panel">
+      <div class="content-wrapper">
+        <div class="row">
+            <div class="col-12 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        {% for task in task_data %}
+                        <div class="mb-5">
+                            <a href="{% url 'list-task' %}">
+                                <div style = "display : inline-block" class="me-2">
+                                    <i class="fa fa-arrow-left card-title"></i>
+                                </div>
+                            </a>
+                            <div style = "display : inline-block">
+                                <h4 class="card-title">Edit Task Details</h4>
+                            </div>
+                            {% if task.status != 'Approved' %}
+                                {% if task.status == 'Submitted' %}
+                                <div style="text-align: right; margin-top: -44px;">
+                                    <a href="{% url 'task-approved' %}?id={{task.id}}" class="revoke-btn"><i class="fa fa-check"></i>&nbsp; Approve</a>
+                                </div>
+                                {% else %}
+                                <div style="text-align: right; margin-top: -44px;">
+                                    <a href="{% url 'revoke-task' %}?id={{task.id}}" class="revoke-btn"><i class="fa fa-undo"></i>&nbsp; Revoke</a>
+                                </div>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                        <form class="forms-sample" action="{% url 'edit-task' %}?id={{task.id}}" method="post">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label for="exampleInputName1">Title</label>
+                                <input type="text" name="title" class="form-control" id="exampleInputName1" placeholder="Title" value="{{task.title}}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="exampleInputName1">Description</label>
+                                <textarea  class="form-control" name="description" rows="4" cols="50" required>{{task.description}}</textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="exampleInputName1">Job</label>
+                                <select name="job_id" class="form-control" id="exampleInputName1" required>
+                                    <option value="" selected disabled>Select Job</option>
+                                    {% for x in job_list %}
+                                    <option value="{{x.id}}" {% if x.id == task.job_id.id %} selected="selected" {% endif %}>{{x.title}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="exampleInputName1">Branch</label>
+                                <select name="branch_id" class="form-control" id="exampleInputName1" required>
+                                    <option value="" selected disabled>Select branch</option>
+                                    {% for x in branch_list %}
+                                    <option value="{{x.id}}" {% if x.id == task.branch_id.id %} selected="selected" {% endif %}>{{x.name}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">Start Date</label>
+                                        <input type="date" name="start_date" class="form-control"  value="{{task.start_date|date:'Y-m-d'}}" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">Start Time</label>
+                                        <input type="time" name="start_time" class="form-control" id="exampleInputName1"  value="{{task.start_time}}" required>
+                                    </div>
+                                    
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">End Date</label>
+                                        <input type="date" name="end_date" class="form-control" id="exampleInputName1" value="{{task.end_date|date:'Y-m-d'}}" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="exampleInputName1">End Time</label>
+                                        <input type="time" name="end_time" class="form-control" id="exampleInputName1"  value="{{task.end_time}}" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="exampleInputName1">Required Hours</label>
+                                <input type="numbmer" name="required_hrs" class="form-control" id="exampleInputName1" placeholder="Required Hours" value="{{task.required_hrs}}" required>
+                            </div>
+                            {% if not request.session.teamLeadertId %}
+                            <div class="form-group">
+                                <label for="exampleInputName1">Team Leader</label>
+                                <select name="team_leader_id" class="form-control" id="exampleInputName1">
+                                    <option value="" selected disabled>Select Team Leader</option>
+                                    {% for x in team_leader_list %}
+                                    <option value="{{x.id}}" {% if x.id == task.team_leader_id.id %} selected="selected" {% endif %}>{{x.name}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            {% else %}
+                            <input type="hidden" name="team_leader_id" value="{{request.session.teamLeadertId}}">
+                            {% endif %}
+                            <div class="form-group">
+                                <label for="exampleInputName1">Agent</label>
+                                <select name="agent_id" class="form-control" id="exampleInputName1">
+                                    <option value="" selected disabled>Select Agent</option>
+                                    {% for x in agent_list %}
+                                    <option value="{{x.id}}" {% if x.id == task.agent_id.id %} selected="selected" {% endif %}>{{x.name}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div>
+                                <button type="submit" class="btn btn-primary btn-submit me-2">Submit</button>
+                            </div>
+                        </form>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
