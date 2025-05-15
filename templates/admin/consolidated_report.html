@@ -1,0 +1,576 @@
+{% extends "admin/layouts/app.html" %}
+{% block content %}
+<style>
+    .select2-selection__choice{
+        height: 26px;
+    }
+
+    .select2-container--default .select2-selection--multiple {
+        border: none !important;
+        height: 0px;
+    }
+</style>
+<div class="container-fluid page-body-wrapper">
+    <div class="main-panel">
+        <div class="content-wrapper">
+            {% if get_data %}
+            <div class="row" style="float: right;">
+                <div class="col">
+                    <button id="export" class="revoke-btn">Export</button>
+                </div>
+            </div>
+            {% endif %}
+            <div class="row my-3">
+                <div class="col" style="margin-left: 10px;">
+                    <h4 class="card-title div-title">Report</h4>
+                </div>
+            </div>
+            
+            <form class="forms-sample" action="{% url 'report' %}" method="post">
+                {% csrf_token %}
+                {% if request_data %}
+                <div class="row">
+                    {% for requests in request_data %}
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label for="exampleInputName1">Date From</label>
+                            <input type="date" name="date_from" class="form-control" id="exampleInputName1" style="height: 33px;" value="{{requests.date_from}}" required>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label for="exampleInputName1">Date To</label>
+                            <input type="date" name="date_to" class="form-control" id="exampleInputName1"  value="{{requests.date_to}}" style="height: 33px;" required>
+                        </div>
+                    </div>
+                    {% if not request.session.clientId %}
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label for="exampleInputName1">Client</label>
+                            <select name="client_id" class="form-control client" required>
+                                <option selected disabled>Select client</option>
+                                {% for x in clients %}
+                                <option value="{{x.id}}" {% if x.id|slugify == requests.client_id|slugify %} selected {% endif %}>{{x.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <p class="card-description client-error" style="color: red; display:none">
+                            Please select client
+                        </p>
+                    </div>
+                    {% else %}
+                    <input type="hidden" value="{{request.session.clientId}}" name="client_id" class="client">
+                    {% endif %}
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label for="exampleInputName1">Report Type</label>
+                            <select name="category" class="form-control category" id="exampleInputName1" style="height: 33px;" required>
+                                <option value="time" {% if requests.category == 'time' %} selected {% endif %}>Time</option>
+                                <option value="performance" {% if requests.category == 'performance' %} selected {% endif %}>Performance</option>
+                                <option value="staff" {% if requests.category == 'staff' %} selected {% endif %}>Staff</option>
+                                <option value="branch" {% if requests.category == 'branch' %} selected {% endif %}>Branch</option>
+                                <option value="window_zone" {% if requests.category == 'window_zone' %} selected {% endif %}>Window Zone</option>
+                                <option value="zone" {% if requests.category == 'zone' %} selected {% endif %}>Zone</option>
+                            </select>
+                        </div>
+                        <p class="card-description error" style="color: red; display:none">
+                            Please select date
+                        </p>
+                    </div>
+                    {% if requests.category == 'staff' %}
+                    <div class="col-md-2 select-based-type">
+                        <div class="form-group">
+                            <label for="exampleInputName1">Select</label>
+                            <select name="category_type_id[]" class="form-control js-select2 select_type" multiple="multiple" id="js-select1" required>
+                                {% for x in staff_list %}
+                                <option value="{{x.id}}" {% if x.id|stringformat:"i" in requests.category_type_id %} selected {% endif %}>{{x.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    {% elif requests.category == 'branch' %}
+                    <div class="col-md-2 select-based-type">
+                        <div class="form-group">
+                            <label for="exampleInputName1">Select</label>
+                            <select name="category_type_id[]" class="form-control js-select2 select_type" multiple="multiple" id="js-select1" required>
+                                {% for x in branch_list %}
+                                <option value="{{x.id}}" {% if x.id|stringformat:"i" in requests.category_type_id %} selected {% endif %}>{{x.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    {% elif requests.category == 'window_zone' %}
+                    <div class="col-md-2 select-based-type">
+                        <div class="form-group">
+                            <label for="exampleInputName1">Select</label>
+                            <select name="category_type_id[]" class="form-control js-select2 select_type" multiple="multiple" id="js-select1" required>
+                                {% for x in window_zone_list %}
+                                <option value="{{x.id}}" {% if x.id|stringformat:"i" in requests.category_type_id %} selected {% endif %}>{{x.zone}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    {% elif requests.category == 'zone' %}
+                    <div class="col-md-2 select-based-type">
+                        <div class="form-group">
+                            <label for="exampleInputName1">Select</label>
+                            <select name="category_type_id[]" class="form-control js-select2 select_type" multiple="multiple" id="js-select1" required>
+                                {% for x in zone_list %}
+                                <option value="{{x.id}}" {% if x.id|stringformat:"i" in requests.category_type_id %} selected {% endif %}>{{x.zone}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    {% elif requests.category == 'time' %}
+                    <div class="col-md-2 select-based-type">
+                        <div class="form-group">
+                            <label for="exampleInputName1">Select</label>
+                            <select name="category_type_id[]" class="form-control select_type" required>
+                                <option value="branch" {% if requests.selected_type == 'branch' %} selected {% endif %}>Branch</option>
+                                <option value="staff" {% if requests.selected_type == 'staff' %} selected {% endif %}>Staff</option>
+                            </select>
+                        </div>
+                    </div>
+                    {% endif %}
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label for="exampleInputName1">Type</label>
+                            <select name="type" class="form-control filter-type" id="exampleInputName1" style="height: 33px;" required>
+                                <option value="consolidated" {% if requests.selected_type == 'consolidated' %} selected {% endif %}>Consolidated</option>
+                                <option value="detailed" {% if requests.selected_type == 'detailed' %} selected {% endif %}>Detailed</option>
+                            </select>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <button type="submit" class="btn-add btn btn-block btn-primary btn-sm font-weight-medium auth-form-btn" {%if request.session.clientId %} style="margin-top: 30px;" {% endif %}>Generate</button>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="row">
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label for="exampleInputName1">Date From </label>
+                            <input type="date" name="date_from" class="form-control" id="exampleInputName1" style="height: 33px;" required>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label for="exampleInputName1">Date To</label>
+                            <input type="date" name="date_to" class="form-control" id="exampleInputName1" style="height: 33px;" required>
+                        </div>
+                    </div>
+                    {%if not request.session.clientId %}
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label for="exampleInputName1">Client</label>
+                            <select name="client_id" class="form-control client" style="height: 33px;" required>
+                                <option selected disabled>Select client</option>
+                                {% for x in clients %}
+                                <option value="{{x.id}}">{{x.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <p class="card-description client-error" style="color: red; display:none">
+                            Please select client
+                        </p>
+                    </div>
+                    {% else %}
+                    <input type="hidden" value="{{request.session.clientId}}" name="client_id" class="client">
+                    {% endif %}
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label for="exampleInputName1">Report Type</label>
+                            <select name="category" class="form-control category" id="exampleInputName1" style="height: 33px;" required>
+                                <option disabled selected>Select report type</option>
+                                <option value="time">Time</option>
+                                <option value="performance">Performance</option>
+                                <option value="staff">Staff</option>
+                                <option value="branch">Branch</option>
+                                <option value="window_zone">Window Zone</option>
+                                <option value="zone">Zone</option>
+                            </select>
+                        </div>
+                        <p class="card-description error" style="color: red; display:none;">
+                            Please select date
+                        </p>
+                    </div>
+                    <div class="col-md-2 select-based-type">
+                        <div class="form-group">
+                            <label for="exampleInputName1">Select</label>
+                            <select name="category_type_id[]" class="form-control js-select2 select_type" multiple="multiple" id="js-select1" required>
+                                
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label for="exampleInputName1">Type</label>
+                            <select name="type" class="form-control filter-type" id="exampleInputName1" style="height: 33px;" required>
+                                <option value="consolidated">Consolidated</option>
+                                <option value="detailed">Detailed</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <button type="submit" class="btn-add btn btn-block btn-primary btn-sm font-weight-medium auth-form-btn generate-button" {%if request.session.clientId %} style="margin-top: 30px;" {% endif %}>Generate</button>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </form>
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="col-lg-12 grid-margin stretch-card">
+                        <div class="card"  style="background: rgba(232, 247, 255);">
+                            <div class="card-body">
+                                <div>
+                                {% if messages %}
+                                    {% for message in messages %}
+                                        <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}" role="alert">{{ message }}</div>
+                                    {% endfor %}
+                                {% endif %}
+                                </div>
+                                
+                                <div class="table-responsive">
+                                    {% if get_data %}
+                                    <table class="table table-striped dataTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Name</th>
+                                                <th>Single</th>
+                                                <th>Group</th>
+                                                <th>Total Count</th>
+                                                <th>Male</th>
+                                                <th>Female</th>
+                                                <th>Converted</th>
+                                                <th>Conversion %</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for x in get_data %}
+                                            <tr>
+                                                <td>
+                                                    {{x.name}}
+                                                </td>
+                                                <td>
+                                                    {{x.single}}
+                                                </td>
+                                                <td>
+                                                    {{x.group}}
+                                                </td>
+                                                <td>
+                                                    {{x.total}}
+                                                </td>
+                                                <td>
+                                                    {{x.male}}
+                                                </td>
+                                                <td>
+                                                    {{x.female}}
+                                                </td>
+                                                <td>
+                                                    {{x.converted_count}}
+                                                </td>
+                                                <td>
+                                                    {{x.pct}}
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                            <tr>
+                                                <td>Total</td>
+                                                <td>
+                                                    {{data_total_sum.sum_single}}
+                                                </td>
+                                                <td>
+                                                    {{data_total_sum.sum_group}}
+                                                </td>
+                                                <td>
+                                                    {{data_total_sum.total_count}}
+                                                </td>
+                                                <td>
+                                                    {{data_total_sum.sum_male}}
+                                                </td>
+                                                <td>
+                                                    {{data_total_sum.sum_female}}
+                                                </td>
+                                                <td>
+                                                    {{data_total_sum.sum_converted_count}}
+                                                </td>
+                                                <td>
+                                                    {{data_total_sum.total_pct}}
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    {% else %}
+                                    <div style="text-align: center;">
+                                        No Data Found
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="col-lg-12 grid-margin stretch-card">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="row">
+                                    <h5 class="card-title" style="font-size: 15px;">Percentage of conversion</h5>
+                                    <input type="hidden" name="list_length" id="list_length" value="{{length}}">
+                                    <div class="col-sm-7 grid-margin">
+                                        <canvas id="bestSellers"></canvas>
+                                    </div>
+                                    <div class="col-sm-5">
+                                        <ul class="graphl-legend-rectangle">
+                                            {% for x in get_data %}
+                                            <input type="hidden" id="type_name{{x.key}}" value="{{x.name}}">
+                                            <input type="hidden" id="type_pct{{x.key}}" value="{{x.pct}}">
+                                            <li><span class="type_color{{x.key}}"></span>{{x.name}}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-12 grid-margin stretch-card">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="row">
+                                    <h5 class="card-title" style="font-size: 15px;">Total Persons</h5>
+                                    <input type="hidden" name="list_length" id="job_list_length" value="2">
+                                    <div class="col-sm-7 grid-margin">
+                                        <canvas id="job_data"></canvas>
+                                    </div>
+                                    <div class="col-sm-5">
+                                        <ul class="graphl-legend-rectangle">
+                                            <input type="hidden" id="job_name1" value="Male">
+                                            <input type="hidden" id="job_pct1" value="{{data_total_sum.sum_male}}">
+                                            <li><span class="type_color3"></span>Male</li>
+                                            <input type="hidden" id="job_name2" value="Male">
+                                            <input type="hidden" id="job_pct2" value="{{data_total_sum.sum_female}}">
+                                            <li><span class="type_color4"></span>Male</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>  
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12 grid-margin grid-margin-md-0 stretch-card">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <h4 class="card-title">Top Performers</h4>
+                                <!-- <h4 class="text-success font-weight-bold">Tickets<span class="text-dark ms-3">163</span></h4> -->
+                            </div>
+                            <div id="support-tracker-legend" class="support-tracker-legend"></div>
+                            <input type="hidden" id="graphDataLength" value="{{length_graph}}">
+                            <canvas id="supportTracker"></canvas>
+                            {% for x in get_data %}
+                            <input type="hidden" name="staff_name" id="staff_name{{x.key}}" value="{{x.name}}">
+                            <input type="hidden" name="conversion_perc" id="conversion_perc{{x.key}}" value="{{x.pct}}">
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).on('change','.category',function() {
+
+        var type        = $(this).val();
+        var client_id   = $('.client').val(); 
+
+        if(client_id == null)
+        {
+            $('.client-error').show();
+            return;
+        }
+
+        if(type == 'time' || type == 'performance')
+        {
+            $('.select_type').empty();   
+            $('.select_type').append(`<option value="branch">Branch</option>`); 
+            $('.select_type').append(`<option value="staff">Staff</option>`);  
+            $('.select_type').removeClass("js-select2");
+            $('.select_type').removeAttr('id');
+            $('.select_type').removeAttr('multiple');
+
+            $('.filter-type').empty();
+            $('.filter-type').append(`<option value="consolidated">consolidated</option>`); 
+            return;
+        }
+
+        $('.error').hide();
+
+        $.ajax({
+            url:"{% url 'get-filter-category' %}",
+            method:"get",
+            data:{type:type,client_id:client_id},
+            success:function(data)
+            {  
+                $('.select_type').empty();
+
+                $('.select_type').addClass("js-select2");
+                $('.select_type').attr('id','js-select1');
+                $('.select_type').attr('multiple',true);
+
+                $('.filter-type').empty();
+                $('.filter-type').append(`<option value="consolidated">Consolidated</option>`); 
+                $('.filter-type').append(`<option value="detailed">Detailed</option>`); 
+                
+                if(type == 'staff')
+                {
+                    $.each( data['models_to_return'], function( key1, value ) 
+                    {
+                        $('.select_type').append(`<option value="`+value['id']+`">`+value['name']+`</option>`);
+                    });
+                }
+                else if(type == 'branch')
+                {
+                    $.each( data['models_to_return'], function( key1, value ) 
+                    {
+                        $('.select_type').append(`<option value="`+value['id']+`">`+value['name']+`</option>`);
+                    });
+                }
+                else if(type == 'window_zone')
+                {
+                    $.each( data['models_to_return'], function( key1, value ) 
+                    {
+                        $('.select_type').append(`<option value="`+value['id']+`">`+value['zone']+`</option>`);
+                    });
+                }
+                else if(type == 'zone')
+                {
+                    $.each( data['models_to_return'], function( key1, value ) 
+                    {
+                        $('.select_type').append(`<option value="`+value['id']+`">`+value['zone']+`</option>`);
+                    });
+                }
+            }
+        });
+    });
+
+    $(document).on('click','.select_type',function() {
+        var category    = $('.category').val();
+
+        if(category == null)
+        {
+            $('.error').show();
+        }
+        
+    });
+</script>
+<script>
+
+    $(document).on('change','.client',function() {
+        var client_id   = $(this).val();    
+        
+        $('.client-error').hide();
+        $('.category').val('');
+        $('.select_type').empty();
+    });
+
+</script>
+<script>
+$(document).on('click','#export',function() {
+    var titles = [];
+    var data = [];
+
+    /*
+    * Get the table headers, this will be CSV headers
+    * The count of headers will be CSV string separator
+    */
+    $('.dataTable th').each(function() {
+        titles.push($(this).text());
+    });
+
+    /*
+    * Get the actual data, this will contain all the data, in 1 array
+    */
+    $('.dataTable td').each(function() {
+        
+        data.push($(this).text().trim());
+    });
+    
+    /*
+    * Convert our data to CSV string
+    */
+    var CSVString = prepCSVRow(titles, titles.length, '');
+    CSVString = prepCSVRow(data, titles.length, CSVString);
+
+    /*
+    * Make CSV downloadable
+    */
+    var downloadLink = document.createElement("a");
+    var blob = new Blob(["\ufeff", CSVString]);
+    var url = URL.createObjectURL(blob);
+    downloadLink.href = url;
+    downloadLink.download = "data.csv";
+
+    /*
+    * Actually download CSV
+    */
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+    });
+
+    /*
+    * Convert data array to CSV string
+    * @param arr {Array} - the actual data
+    * @param columnCount {Number} - the amount to split the data into columns
+    * @param initial {String} - initial string to append to CSV string
+    * return {String} - ready CSV string
+    */
+    function prepCSVRow(arr, columnCount, initial) {
+    var row = ''; // this will hold data
+    var delimeter = ','; // data slice separator, in excel it's `;`, in usual CSv it's `,`
+    var newLine = '\r\n'; // newline separator for CSV row
+
+    /*
+    * Convert [1,2,3,4] into [[1,2], [3,4]] while count is 2
+    * @param _arr {Array} - the actual array to split
+    * @param _count {Number} - the amount to split
+    * return {Array} - splitted array
+    */
+    function splitArray(_arr, _count) {
+        var splitted = [];
+        var result = [];
+        _arr.forEach(function(item, idx) {
+        if ((idx + 1) % _count === 0) {
+            splitted.push(item);
+            result.push(splitted);
+            splitted = [];
+        } else {
+            splitted.push(item);
+        }
+        });
+        return result;
+    }
+    var plainArr = splitArray(arr, columnCount);
+    // don't know how to explain this
+    // you just have to like follow the code
+    // and you understand, it's pretty simple
+    // it converts `['a', 'b', 'c']` to `a,b,c` string
+    plainArr.forEach(function(arrItem) {
+        arrItem.forEach(function(item, idx) {
+        row += item + ((idx + 1) === arrItem.length ? '' : delimeter);
+        });
+        row += newLine;
+    });
+    return initial + row;
+    }
+</script>
+
+{% endblock %}

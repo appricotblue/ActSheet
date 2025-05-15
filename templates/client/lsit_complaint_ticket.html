@@ -1,0 +1,111 @@
+{% extends "admin/layouts/app.html" %}
+{% block content %}
+<div class="container-fluid page-body-wrapper">
+    <div class="main-panel">
+        <div class="content-wrapper">
+            <div class="row my-3">
+                <div class="col" style="margin-left: 10px;">
+                    <h4 class="card-title div-title">Complaint Tickets</h4>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12 grid-margin stretch-card">
+                    <div class="card">
+                        <div class="card-body">
+                            <div>
+                            {% if messages %}
+                                {% for message in messages %}
+                                    <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}" role="alert">{{ message }}</div>
+                                {% endfor %}
+                            {% endif %}
+                            </div>
+                            
+                            <div class="table-responsive">
+                                {% if all_complaints %}
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Client</th>
+                                            {% if not request.session.teamLeadertId %}
+                                            <th>Team Leader</th>
+                                            {% endif %}
+                                            <th>Issue</th>
+                                            <th>Created Date</th>
+                                            <th>Status</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for x in all_complaints %}
+                                        <tr>
+                                            <td class="py-1">
+                                                {{x.client_id.client_id}}
+                                            </td>
+                                            {% if not request.session.teamLeadertId %}
+                                            <td>
+                                                {{x.team_leader_id.name}}
+                                            </td>
+                                            {% endif %}
+                                            <td>
+                                                {{x.remark}}
+                                            </td>
+                                            <td>
+                                                {{ x.created_at|date:"M d, Y" }}
+                                            </td>
+                                            <td>
+                                                {% if x.status == 'Pending' %}
+                                                <span class="bullet bullet-dot h-6px w-6px bg-danger position-absolute animation-blink" style="padding-bottom: 7px;
+                                                    padding-right: 7px;    
+                                                    color: white; 
+                                                    font-size: 12px;
+                                                    text-align: center;
+                                                    width: 60px;
+                                                    height: 20px;
+                                                    border-radius: 0 !important;">
+                                                    <p style="font-size: 12px;">{{x.status}}</a></p>
+                                                </span>
+                                                {% elif x.status == 'Accept' %}
+                                                <span class="bullet bullet-dot h-6px w-6px position-absolute" style="padding-bottom: 7px;
+                                                    padding-right: 7px;    
+                                                    color: white; 
+                                                    font-size: 12px;
+                                                    text-align: center;
+                                                    width: 60px;
+                                                    height: 20px;
+                                                    border-radius: 0 !important;
+                                                    background-color: #FFA500;">
+                                                    <p style="font-size: 12px;">{{x.status}}</a></p>
+                                                </span>
+                                                {% elif x.status == 'Solved' %}
+                                                <span class="bullet bullet-dot h-6px w-6px position-absolute" style="padding-bottom: 7px;
+                                                    padding-right: 7px;    
+                                                    color: white; 
+                                                    font-size: 12px;
+                                                    text-align: center;
+                                                    width: 60px;
+                                                    height: 20px;
+                                                    border-radius: 0 !important;
+                                                    background-color: #008000;">
+                                                    <p style="font-size: 12px;">{{x.status}}</a></p>
+                                                </span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <a href="{% url 'edit-complaint-ticket' %}?id={{x.id}}" class="text-success btn btn-link px-1">
+                                                    <i class="mdi mdi-eye text-primary text-success"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,80 @@
+{% extends "admin/layouts/app.html" %}
+{% block content %}
+<div class="container-fluid page-body-wrapper">
+    <div class="main-panel">
+        <div class="content-wrapper">
+            <div class="row my-3">
+                <div class="col" style="margin-left: 10px;">
+                    <h4 class="card-title div-title">Branch</h4>
+                </div>
+                <div class="col" style="text-align: right;">
+                    <a href="{% url 'add-branch' %}" class="btn-add btn btn-block btn-primary btn-sm font-weight-medium auth-form-btn">+ ADD NEW</a>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12 grid-margin stretch-card">
+                    <div class="card">
+                        <div class="card-body">
+                            <div>
+                            {% if messages %}
+                                {% for message in messages %}
+                                    <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}" role="alert">{{ message }}</div>
+                                {% endfor %}
+                            {% endif %}
+                            </div>
+                            
+                            <div class="table-responsive">
+                                {% if branch_list %}
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Sl. No</th>
+                                            <th>Branch name</th>
+                                            <th>Client</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for x in branch_list %}
+                                        <tr>
+                                            <td class="py-1">
+                                                {{x.id}}
+                                            </td>
+                                            <td>
+                                                {{x.name}}
+                                            </td>
+                                            <td>
+                                                {{x.client_id.name}}
+                                            </td>
+                                            <td>
+                                                <div class="dropdown">
+                                                    <a href="#" class="text-success btn btn-link  px-1"><i class="mdi mdi-refresh"></i></a>
+                                                    <a href="#" class="text-success btn btn-link px-1 dropdown-toggle dropdown-arrow-none" data-bs-toggle="dropdown" id="settingsDropdownsales">
+                                                        <i class="mdi mdi-dots-horizontal"></i>
+                                                    </a>
+                                                    <div class="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="settingsDropdownsales">
+                                                        <a href="{% url 'edit-branch' %}?id={{x.id}}" class="dropdown-item">
+                                                            <i class="mdi mdi-grease-pencil text-primary"></i>
+                                                            Edit
+                                                        </a>
+                                                        <a href="{% url 'delete-branch' %}?id={{x.id}}" class="dropdown-item">
+                                                            <i class="mdi mdi-delete text-primary"></i>
+                                                            Delete
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
